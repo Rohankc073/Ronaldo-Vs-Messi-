@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ronaldo vs Messi - Ultimate Analysis Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --ronaldo-color: #e74c3c;
+            --ronaldo-gradient: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            --messi-color: #3498db;
+            --messi-gradient: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            --dark-bg: #1a1a1a;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --shadow-heavy: 0 10px 40px rgba(0, 0, 0, 0.15);
+            --border-radius: 16px;
+            --border-radius-small: 8px;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        /* Navigation Styles */
+        .navbar {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+            box-shadow: var(--shadow-heavy);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+        
+        .nav-logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-logo i {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 0.2rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-small);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+        
+        .nav-link:hover::before,
+        .nav-link.active::before {
+            left: 0;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        /* Container Styles */
+        .container {
+            max-width: 1400px;
+            margin: 100px auto 0;
+            padding: 2rem;
+        }
+        
+        /* Section Styles */
+        .section {
+            display: none;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-heavy);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+        
+        .section.active {
+            display: block;
+            animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+        
+        /* Player Cards */
+        .player-comparison {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 2rem;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+        
+        .player-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--ronaldo-gradient);
+        }
+        
+        .player-card.messi::before {
+            background: var(--messi-gradient);
+        }
+        
+        .player-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .player-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .vs-indicator {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid var(--ronaldo-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card.messi-wins {
+            border-left-color: var(--messi-color);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .stat-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .highlight-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--ronaldo-color);
+            display: block;
+            margin-bottom: 0.25rem;
+            line-height: 1;
+        }
+        
+        .messi-number {
+            color: var(--messi-color);
+        }
+        
+        /* Charts Container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .chart-wrapper {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-gradient);
+        }
+        
+        .chart-wrapper:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--text-primary);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        .chart-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: var(--primary-gradient);
+            border-radius: 1px;
+        }
+        
+        .chart-canvas {
+            max-height: 350px;
+        }
+        
+        /* Heat Map Specific Styles */
+        .heatmap-container {
+            background: #0d1b2a;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .field-canvas {
+            width: 100%;
+            height: 400px;
+            border-radius: var(--border-radius-small);
+            background: #1b4332;
+        }
+        
+        /* Winner Banner */
+        .winner-banner {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-light);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .winner-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .winner-score {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Tables */
+        .comparison-table {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 2rem;
+        }
+        
+        .comparison-table h3 {
+            padding: 1.5rem;
+            background: var(--primary-gradient);
+            color: white;
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        th {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            color: var(--text-primary);
+        }
+        
+        tr:hover {
+            background: rgba(102, 126, 234, 0.02);
+        }
+        
+        .ronaldo-wins {
+            color: var(--ronaldo-color);
+            font-weight: 600;
+        }
+        
+        .messi-wins {
+            color: var(--messi-color);
+            font-weight: 600;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: white;
+        }
+        
+        .loading i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Final Verdict */
+        .final-verdict {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            text-align: center;
+            margin: 3rem 0;
+            box-shadow: var(--shadow-heavy);
+            color: white;
+        }
+        
+        .verdict-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .verdict-content {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+        
+        .category-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .category-score {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: var(--border-radius-small);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Performance Indicators */
+        .performance-indicator {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .indicator-better {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(39, 174, 96, 0.2);
+        }
+        
+        .indicator-worse {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--ronaldo-color);
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .nav-menu {
+                display: none;
+            }
+            
+            .player-comparison {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .vs-indicator {
+                order: -1;
+                font-size: 2rem;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                margin-top: 80px;
+            }
+            
+            .section {
+                padding: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-container {
+                padding: 0 1rem;
+            }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6b4d96 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-futbol"></i>
+                <span>GOAT ANALYSIS</span>
+            </div>
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="#" class="nav-link active" onclick="showSection('overview')">
+                    <i class="fas fa-home"></i> Overview
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('career-stats')">
+                    <i class="fas fa-chart-line"></i> Career Stats
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('international')">
+                    <i class="fas fa-globe"></i> International
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('club-career')">
+                    <i class="fas fa-trophy"></i> Club Career
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('individual-awards')">
+                    <i class="fas fa-medal"></i> Awards
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('physical')">
+                    <i class="fas fa-dumbbell"></i> Physical
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('league-performance')">
+                    <i class="fas fa-flag"></i> Leagues
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('team-influence')">
+                    <i class="fas fa-users"></i> Leadership
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('heat-maps')">
+                    <i class="fas fa-fire"></i> Heat Maps
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('fan-base')">
+                    <i class="fas fa-heart"></i> Fan Base
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('season-performance')">
+                    <i class="fas fa-calendar"></i> Seasons
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('final-verdict')">
+                    <i class="fas fa-crown"></i> Verdict
+                </a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="loading" id="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Loading the ultimate football comparison...</p>
+        </div>
+
+        <!-- Overview Section -->
+        <section id="overview" class="section active">
+            <div class="section-header">
+                <h1 class="section-title">🐐 THE ULTIMATE GOAT DEBATE</h1>
+                <p class="section-subtitle">
+                    A comprehensive analysis comparing two of the greatest footballers of all time across every possible metric
+                </p>
+            </div>
+            
+            <div class="player-comparison">
+                <div class="player-card ronaldo">
+                    <h2>🇵🇹 Cristiano Ronaldo</h2>
+                    <div id="ronaldo-overview-stats"></div>
+                </div>
+                
+                <div class="vs-indicator">VS</div>
+                
+                <div class="player-card messi">
+                    <h2>🇦🇷 Lionel Messi</h2>
+                    <div id="messi-overview-stats"></div>
+                </div>
+            </div>
+            
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Career Overview</h3>
+                    <canvas id="overviewChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Major Achievements</h3>
+                    <canvas id="achievementsChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Goals vs Assists</h3>
+                    <canvas id="overviewGoalsAssists" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Individual Awards</h3>
+                    <canvas id="overviewAwards" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Career Stats Section -->
+        <section id="career-stats" class="section">
+            <div class="section-header">
+                <h1 class="section-title">📊 CAREER STATISTICS</h1>
+                <p class="section-subtitle">
+                    Complete breakdown of goals, assists, matches played, and performance metrics
+                </p>
+            </div>
+            
+            <div class="stats-grid" id="career-stats-grid"></div>
+            
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Goals & Assists Comparison</h3>
+                    <canvas id="goalsAssistsChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Efficiency Metrics</h3>
+                    <canvas id="efficiencyChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Disciplinary Record</h3>
+                    <canvas id="disciplinaryChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Special Goals Breakdown</h3>
+                    <canvas id="specialGoalsChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Career Progression</h3>
+                    <canvas id="careerProgressionChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Match Impact</h3>
+                    <canvas id="matchImpactChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- International Section -->
+        <section id="international" class="section">
+            <div class="section-header">
+                <h1 class="section-title">🌍 INTERNATIONAL CAREER</h1>
+                <p class="section-subtitle">
+                    National team performance, major tournaments, and international achievements
+                </p>
+            </div>
+            
+            <div class="winner-banner" id="international-winner"></div>
+            
+            <div class="stats-grid" id="international-stats-grid"></div>
+            
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">International Goals & Caps</h3>
+                    <canvas id="internationalStatsChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Tournament Performance</h3>
+                    <canvas id="tournamentChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Major Tournament Goals</h3>
+                    <canvas id="majorTournamentGoalsChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">International Timeline</h3>
+                    <canvas id="internationalTimelineChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Club Career Section -->
+        <section id="club-career" class="section">
+            <div class="section-header">
+                <h1 class="section-title">🏆 CLUB CAREER</h1>
+                <p class="section-subtitle">
+                    Club achievements, trophies won, and performance across different teams
+                </p>
+            </div>
+            
+            <div class="stats-grid" id="club-career-stats-grid"></div>
+            
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Goals by Club</h3>
+                    <canvas id="clubGoalsChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Trophy Comparison</h3>
+                    <canvas id="trophyChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Champions League Performance</h3>
+                    <canvas id="championsLeagueChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Transfer Market Impact</h3>
+                    <canvas id="transferChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Individual Awards Section -->
+        <section id="individual-awards" class="section">
+            <div class="section-header">
+                <h1 class="section-title">🥇 INDIVIDUAL AWARDS</h1>
+                <p class="section-subtitle">
+                    Ballon d'Or, FIFA awards, and other individual recognitions
+                </p>
+            </div>
+            
+            <div class="stats-grid" id="awards-stats-grid"></div>
+            
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Major Individual Awards</h3>
+                    <canvas id="majorAwardsChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Ballon d'Or History</h3>
+                    <canvas id="ballonDorChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Award Timeline</h3>
+                    <canvas id="awardTimelineChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Physical Attributes Section -->
+        <section id="physical" class="section">
+            <div class="section-header">
+                <h1 class="section-title">💪 PHYSICAL & TECHNICAL</h1>
+                <p class="section-subtitle">
+                    Playing style, physical attributes, and technical skills comparison
+                </p>
+            </div>
+            
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Technical Skills Radar</h3>
+                    <canvas id="technicalSkillsChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Physical Attributes</h3>
+                    <canvas id="physicalAttributesChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Playing Style Comparison</h3>
+                    <canvas id="playingStyleChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Skill Evolution</h3>
+                    <canvas id="skillEvolutionChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- League Performance Section -->
+        <section id="league-performance" class="section">
+            <div class="section-header">
+                <h1 class="section-title">🏅 LEAGUE PERFORMANCE</h1>
+                <p class="section-subtitle">
+                    Performance across different leagues and competitions
+                </p>
+            </div>
+            
+            <div class="stats-grid" id="league-stats-grid"></div>
+            
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">League Goals Comparison</h3>
+                    <canvas id="leagueGoalsChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">League Titles Won</h3>
+                    <canvas id="leagueTitlesChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">League Adaptation</h3>
+                    <canvas id="leagueAdaptationChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team Influence Section -->
+        <section id="team-influence" class="section">
+            <div class="section-header">
+                <h1 class="section-title">👑 LEADERSHIP & INFLUENCE</h1>
+                <p class="section-subtitle">
+                    Impact on team performance, leadership qualities, and clutch moments
+                </p>
+            </div>
+            
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Leadership Attributes</h3>
+                    <canvas id="leadershipChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Clutch Performance</h3>
+                    <canvas id="clutchChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Team Impact Metrics</h3>
+                    <canvas id="teamImpactChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Heat Maps Section -->
+        <section id="heat-maps" class="section">
+            <div class="section-header">
+                <h1 class="section-title">🔥 POSITIONAL HEAT MAPS</h1>
+                <p class="section-subtitle">
+                    Field positioning analysis showing where each player spent most of their time during matches
+                </p>
+            </div>
+            
+            <div class="stats-grid" id="heatmap-stats-grid"></div>
+            
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Messi - "The Magician" Heat Map</h3>
+                    <div class="heatmap-container">
+                        <canvas id="messiHeatmapChart" class="field-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Ronaldo - "The Goal Machine" Heat Map</h3>
+                    <div class="heatmap-container">
+                        <canvas id="ronaldoHeatmapChart" class="field-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Positional Statistics Comparison</h3>
+                    <canvas id="positionalStatsChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Zone Activity Analysis</h3>
+                    <canvas id="zoneActivityChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+            
+            <div class="comparison-table">
+                <h3>📊 Heat Map Analysis Summary</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Messi</th>
+                            <th>Ronaldo</th>
+                            <th>Analysis</th>
+                        </tr>
+                    </thead>
+                    <tbody id="heatmap-analysis-table"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Fan Base Section -->
+        <section id="fan-base" class="section">
+            <div class="section-header">
+                <h1 class="section-title">❤️ GLOBAL IMPACT & FAN BASE</h1>
+                <p class="section-subtitle">
+                    Social media following, commercial value, and global popularity
+                </p>
+            </div>
+            
+            <div class="stats-grid" id="fanbase-stats-grid"></div>
+            
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Social Media Following</h3>
+                    <canvas id="socialMediaChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Commercial Value</h3>
+                    <canvas id="commercialChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Global Reach</h3>
+                    <canvas id="globalReachChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Season Performance Section -->
+        <section id="season-performance" class="section">
+            <div class="section-header">
+                <h1 class="section-title">📅 PEAK SEASONS</h1>
+                <p class="section-subtitle">
+                    Best individual seasons and consistency over time
+                </p>
+            </div>
+            
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Best Seasons Goals</h3>
+                    <canvas id="bestSeasonsChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Season Goals + Assists</h3>
+                    <canvas id="seasonTotalChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 class="chart-title">Consistency Analysis</h3>
+                    <canvas id="consistencyChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Verdict Section -->
+        <section id="final-verdict" class="section">
+            <div class="section-header">
+                <h1 class="section-title">👑 THE FINAL VERDICT</h1>
+                <p class="section-subtitle">
+                    Based on comprehensive analysis across all categories
+                </p>
+            </div>
+            
+            <div class="final-verdict" id="final-verdict-content"></div>
+            
+            <div class="comparison-table">
+                <h3>🏆 Category Winners Summary</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Winner</th>
+                            <th>Key Factor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="verdict-table"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let playerData = {};
+        let winnerAnalysis = {};
+        let heatmapData = {};
+        
+        // Initialize dashboard
+        async function initializeDashboard() {
+            try {
+                const responses = await Promise.all([
+                    fetch('/api/player_data'),
+                    fetch('/api/winner_analysis'),
+                    fetch('/api/heatmap_data')
+                ]);
+                
+                playerData = await responses[0].json();
+                winnerAnalysis = await responses[1].json();
+                heatmapData = await responses[2].json();
+                
+                populateAllSections();
+                createAllCharts();
+                
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.section.active').style.display = 'block';
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loading').innerHTML = 
+                    '<i class="fas fa-exclamation-triangle"></i><p>Error loading data. Please try again.</p>';
+            }
+        }
+        
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            const targetSection = document.getElementById(sectionId);
+            targetSection.style.display = 'block';
+            setTimeout(() => {
+                targetSection.classList.add('active');
+            }, 10);
+            
+            // Update nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.closest('.nav-link').classList.add('active');
+        }
+        
+        function populateAllSections() {
+            populateOverviewSection();
+            populateCareerStatsSection();
+            populateInternationalSection();
+            populateClubCareerSection();
+            populateAwardsSection();
+            populateLeagueSection();
+            populateFanbaseSection();
+            populateHeatmapSection();
+            populateFinalVerdict();
+        }
+        
+        function populateOverviewSection() {
+            const ronaldo = playerData.ronaldo;
+            const messi = playerData.messi;
+            
+            document.getElementById('ronaldo-overview-stats').innerHTML = `
+                <div style="margin-top: 1rem; text-align: left;">
+                    <div style="margin-bottom: 0.5rem;"><strong>Age:</strong> ${new Date().getFullYear() - new Date(ronaldo.birth_date).getFullYear()}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Goals:</strong> ${ronaldo.career_stats.total_goals}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Assists:</strong> ${ronaldo.career_stats.total_assists}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Trophies:</strong> ${ronaldo.club_career.major_trophies}</div>
+                    <div><strong>Ballon d'Or:</strong> ${ronaldo.individual_awards.ballon_dor}</div>
+                </div>
+            `;
+            
+            document.getElementById('messi-overview-stats').innerHTML = `
+                <div style="margin-top: 1rem; text-align: left;">
+                    <div style="margin-bottom: 0.5rem;"><strong>Age:</strong> ${new Date().getFullYear() - new Date(messi.birth_date).getFullYear()}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Goals:</strong> ${messi.career_stats.total_goals}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Assists:</strong> ${messi.career_stats.total_assists}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Trophies:</strong> ${messi.club_career.major_trophies}</div>
+                    <div><strong>Ballon d'Or:</strong> ${messi.individual_awards.ballon_dor}</div>
+                </div>
+            `;
+        }
+        
+        function populateCareerStatsSection() {
+            const ronaldo = playerData.ronaldo.career_stats;
+            const messi = playerData.messi.career_stats;
+            
+            const statsContainer = document.getElementById('career-stats-grid');
+            const stats = [
+                {label: 'Total Goals', ronaldo: ronaldo.total_goals, messi: messi.total_goals},
+                {label: 'Total Assists', ronaldo: ronaldo.total_assists, messi: messi.total_assists},
+                {label: 'Goals per Game', ronaldo: ronaldo.goals_per_game, messi: messi.goals_per_game},
+                {label: 'Assists per Game', ronaldo: ronaldo.assists_per_game, messi: messi.assists_per_game},
+                {label: 'Hat Tricks', ronaldo: ronaldo.hat_tricks, messi: messi.hat_tricks},
+                {label: 'Penalties Scored', ronaldo: ronaldo.penalties_scored, messi: messi.penalties_scored},
+                {label: 'Free Kicks Scored', ronaldo: ronaldo.free_kicks_scored, messi: messi.free_kicks_scored},
+                {label: 'Total Matches', ronaldo: ronaldo.total_matches, messi: messi.total_matches}
+            ];
+            
+            statsContainer.innerHTML = stats.map(stat => `
+                <div class="stat-card ${stat.messi > stat.ronaldo ? 'messi-wins' : ''}">
+                    <h3>${stat.label}</h3>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                        <div>
+                            <span class="highlight-number">${stat.ronaldo}</span>
+                            <span>Ronaldo</span>
+                        </div>
+                        <div>
+                            <span class="highlight-number messi-number">${stat.messi}</span>
+                            <span>Messi</span>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <span class="performance-indicator ${stat.ronaldo > stat.messi ? 'indicator-better' : 'indicator-worse'}">
+                            ${stat.ronaldo > stat.messi ? '🇵🇹 Ronaldo Leads' : '🇦🇷 Messi Leads'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function populateInternationalSection() {
+            const ronaldo = playerData.ronaldo.international;
+            const messi = playerData.messi.international;
+            
+            const winner = winnerAnalysis.international;
+            document.getElementById('international-winner').innerHTML = `
+                <div class="winner-text">
+                    🏆 International Winner: ${winner === 'messi' ? '🇦🇷 Lionel Messi' : '🇵🇹 Cristiano Ronaldo'}
+                </div>
+                <div class="winner-score">
+                    ${winner === 'messi' ? 'World Cup triumph gives Messi the edge' : 'More international goals and longer career'}
+                </div>
+            `;
+            
+            const statsContainer = document.getElementById('international-stats-grid');
+            const stats = [
+                {label: 'International Goals', ronaldo: ronaldo.goals, messi: messi.goals},
+                {label: 'International Caps', ronaldo: ronaldo.caps, messi: messi.caps},
+                {label: 'World Cup Goals', ronaldo: ronaldo.world_cup_goals, messi: messi.world_cup_goals},
+                {label: 'Major Tournaments Won', ronaldo: ronaldo.major_tournaments_won.length, messi: messi.major_tournaments_won.length},
+                {label: 'As Captain', ronaldo: ronaldo.captain_matches, messi: messi.captain_matches},
+                {label: 'International Assists', ronaldo: ronaldo.assists, messi: messi.assists}
+            ];
+            
+            statsContainer.innerHTML = stats.map(stat => `
+                <div class="stat-card ${stat.messi > stat.ronaldo ? 'messi-wins' : ''}">
+                    <h3>${stat.label}</h3>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                        <div>
+                            <span class="highlight-number">${stat.ronaldo}</span>
+                            <span>Ronaldo</span>
+                        </div>
+                        <div>
+                            <span class="highlight-number messi-number">${stat.messi}</span>
+                            <span>Messi</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function populateClubCareerSection() {
+            const ronaldo = playerData.ronaldo.club_career;
+            const messi = playerData.messi.club_career;
+            
+            const statsContainer = document.getElementById('club-career-stats-grid');
+            const stats = [
+                {label: 'Champions League Titles', ronaldo: ronaldo.champions_league, messi: messi.champions_league},
+                {label: 'League Titles', ronaldo: ronaldo.league_titles, messi: messi.league_titles},
+                {label: 'Total Club Trophies', ronaldo: ronaldo.major_trophies, messi: messi.major_trophies},
+                {label: 'Domestic Cups', ronaldo: ronaldo.domestic_cups, messi: messi.domestic_cups}
+            ];
+            
+            statsContainer.innerHTML = stats.map(stat => `
+                <div class="stat-card ${stat.messi > stat.ronaldo ? 'messi-wins' : ''}">
+                    <h3>${stat.label}</h3>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                        <div>
+                            <span class="highlight-number">${stat.ronaldo}</span>
+                            <span>Ronaldo</span>
+                        </div>
+                        <div>
+                            <span class="highlight-number messi-number">${stat.messi}</span>
+                            <span>Messi</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function populateAwardsSection() {
+            const ronaldo = playerData.ronaldo.individual_awards;
+            const messi = playerData.messi.individual_awards;
+            
+            const statsContainer = document.getElementById('awards-stats-grid');
+            const stats = [
+                {label: 'Ballon d\'Or Awards', ronaldo: ronaldo.ballon_dor, messi: messi.ballon_dor},
+                {label: 'FIFA Best Awards', ronaldo: ronaldo.fifa_best, messi: messi.fifa_best},
+                {label: 'Golden Boot Awards', ronaldo: ronaldo.golden_boot, messi: messi.golden_boot},
+                {label: 'Champions League Top Scorer', ronaldo: ronaldo.champions_league_top_scorer, messi: messi.champions_league_top_scorer},
+                {label: 'UEFA Player of the Year', ronaldo: ronaldo.uefa_player_year, messi: messi.uefa_player_year},
+                {label: 'Globe Soccer Player Awards', ronaldo: ronaldo.globe_soccer_player, messi: messi.globe_soccer_player}
+            ];
+            
+            statsContainer.innerHTML = stats.map(stat => `
+                <div class="stat-card ${stat.messi > stat.ronaldo ? 'messi-wins' : ''}">
+                    <h3>${stat.label}</h3>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                        <div>
+                            <span class="highlight-number">${stat.ronaldo}</span>
+                            <span>Ronaldo</span>
+                        </div>
+                        <div>
+                            <span class="highlight-number messi-number">${stat.messi}</span>
+                            <span>Messi</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function populateLeagueSection() {
+            const ronaldo = playerData.ronaldo.league_performance;
+            const messi = playerData.messi.league_performance;
+            
+            const statsContainer = document.getElementById('league-stats-grid');
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <h3>Premier League</h3>
+                    <div style="margin-top: 1rem;">
+                        <div><strong>Ronaldo:</strong> ${ronaldo.premier_league.goals} goals in ${ronaldo.premier_league.matches} matches</div>
+                        <div style="color: var(--text-secondary);"><strong>Messi:</strong> Never played</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>La Liga</h3>
+                    <div style="margin-top: 1rem;">
+                        <div><strong>Ronaldo:</strong> ${ronaldo.la_liga.goals} goals in ${ronaldo.la_liga.matches} matches</div>
+                        <div><strong>Messi:</strong> ${messi.la_liga.goals} goals in ${messi.la_liga.matches} matches</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>Serie A</h3>
+                    <div style="margin-top: 1rem;">
+                        <div><strong>Ronaldo:</strong> ${ronaldo.serie_a.goals} goals in ${ronaldo.serie_a.matches} matches</div>
+                        <div style="color: var(--text-secondary);"><strong>Messi:</strong> Never played</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>Ligue 1</h3>
+                    <div style="margin-top: 1rem;">
+                        <div style="color: var(--text-secondary);"><strong>Ronaldo:</strong> Never played</div>
+                        <div><strong>Messi:</strong> ${messi.ligue_1.goals} goals in ${messi.ligue_1.matches} matches</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>MLS</h3>
+                    <div style="margin-top: 1rem;">
+                        <div style="color: var(--text-secondary);"><strong>Ronaldo:</strong> Never played</div>
+                        <div><strong>Messi:</strong> ${messi.mls.goals} goals in ${messi.mls.matches} matches</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>Saudi League</h3>
+                    <div style="margin-top: 1rem;">
+                        <div><strong>Ronaldo:</strong> ${ronaldo.saudi_league.goals} goals in ${ronaldo.saudi_league.matches} matches</div>
+                        <div style="color: var(--text-secondary);"><strong>Messi:</strong> Never played</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function populateFanbaseSection() {
+            const ronaldo = playerData.ronaldo.fan_base;
+            const messi = playerData.messi.fan_base;
+            
+            const statsContainer = document.getElementById('fanbase-stats-grid');
+            const stats = [
+                {label: 'Instagram Followers', ronaldo: `${(ronaldo.instagram_followers/1000000).toFixed(0)}M`, messi: `${(messi.instagram_followers/1000000).toFixed(0)}M`},
+                {label: 'Twitter Followers', ronaldo: `${(ronaldo.twitter_followers/1000000).toFixed(0)}M`, messi: `${(messi.twitter_followers/1000000).toFixed(0)}M`},
+                {label: 'Facebook Followers', ronaldo: `${(ronaldo.facebook_followers/1000000).toFixed(0)}M`, messi: `${(messi.facebook_followers/1000000).toFixed(0)}M`},
+                {label: 'Brand Value', ronaldo: `${(ronaldo.brand_value/1000000000).toFixed(1)}B`, messi: `${(messi.brand_value/1000000000).toFixed(1)}B`},
+                {label: 'Endorsement Deals', ronaldo: ronaldo.endorsement_deals, messi: messi.endorsement_deals},
+                {label: 'Global Marketability', ronaldo: ronaldo.global_marketability, messi: messi.global_marketability}
+            ];
+            
+            statsContainer.innerHTML = stats.map(stat => `
+                <div class="stat-card">
+                    <h3>${stat.label}</h3>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                        <div>
+                            <span class="highlight-number">${stat.ronaldo}</span>
+                            <span>Ronaldo</span>
+                        </div>
+                        <div>
+                            <span class="highlight-number messi-number">${stat.messi}</span>
+                            <span>Messi</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function populateHeatmapSection() {
+            if (!heatmapData.messi || !heatmapData.ronaldo) return;
+            
+            const messiStats = heatmapData.messi.stats;
+            const ronaldoStats = heatmapData.ronaldo.stats;
+            
+            const statsContainer = document.getElementById('heatmap-stats-grid');
+            const stats = [
+                {label: 'Average X Position', messi: messiStats.avg_x.toFixed(1), ronaldo: ronaldoStats.avg_x.toFixed(1), unit: 'm'},
+                {label: 'Average Y Position', messi: messiStats.avg_y.toFixed(1), ronaldo: ronaldoStats.avg_y.toFixed(1), unit: 'm'},
+                {label: 'Final Third Presence', messi: messiStats.final_third_percent.toFixed(1), ronaldo: ronaldoStats.final_third_percent.toFixed(1), unit: '%'},
+                {label: 'Penalty Area Presence', messi: messiStats.penalty_area_percent.toFixed(1), ronaldo: ronaldoStats.penalty_area_percent.toFixed(1), unit: '%'}
+            ];
+            
+            statsContainer.innerHTML = stats.map(stat => `
+                <div class="stat-card ${parseFloat(stat.messi) > parseFloat(stat.ronaldo) ? 'messi-wins' : ''}">
+                    <h3>${stat.label}</h3>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                        <div>
+                            <span class="highlight-number messi-number">${stat.messi}${stat.unit}</span>
+                            <span>Messi</span>
+                        </div>
+                        <div>
+                            <span class="highlight-number">${stat.ronaldo}${stat.unit}</span>
+                            <span>Ronaldo</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Populate analysis table
+            const analysisTable = document.getElementById('heatmap-analysis-table');
+            const analyses = [
+                {
+                    metric: 'Playing Position',
+                    messi: 'False 9 / Right Wing',
+                    ronaldo: 'Center Forward / Left Wing',
+                    analysis: 'Messi more versatile, Ronaldo more specialized'
+                },
+                {
+                    metric: 'Field Coverage',
+                    messi: `${messiStats.avg_x.toFixed(0)}m from goal`,
+                    ronaldo: `${ronaldoStats.avg_x.toFixed(0)}m from goal`,
+                    analysis: ronaldoStats.avg_x > messiStats.avg_x ? 'Ronaldo operates higher up field' : 'Messi operates higher up field'
+                },
+                {
+                    metric: 'Final Third Activity',
+                    messi: `${messiStats.final_third_percent.toFixed(1)}%`,
+                    ronaldo: `${ronaldoStats.final_third_percent.toFixed(1)}%`,
+                    analysis: ronaldoStats.final_third_percent > messiStats.final_third_percent ? 'Ronaldo more attack-focused' : 'Messi more creative from deep'
+                },
+                {
+                    metric: 'Penalty Box Presence',
+                    messi: `${messiStats.penalty_area_percent.toFixed(1)}%`,
+                    ronaldo: `${ronaldoStats.penalty_area_percent.toFixed(1)}%`,
+                    analysis: ronaldoStats.penalty_area_percent > messiStats.penalty_area_percent ? 'Ronaldo is the classic #9' : 'Messi creates from outside box'
+                }
+            ];
+            
+            analysisTable.innerHTML = analyses.map(analysis => `
+                <tr>
+                    <td><strong>${analysis.metric}</strong></td>
+                    <td class="messi-wins">${analysis.messi}</td>
+                    <td class="ronaldo-wins">${analysis.ronaldo}</td>
+                    <td>${analysis.analysis}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function populateFinalVerdict() {
+            const scores = winnerAnalysis.scores;
+            const overallWinner = winnerAnalysis.overall_winner;
+            
+            const verdictContent = document.getElementById('final-verdict-content');
+            
+            let winnerText = '';
+            let winnerEmoji = '';
+            let description = '';
+            
+            if (overallWinner === 'ronaldo') {
+                winnerText = 'Cristiano Ronaldo';
+                winnerEmoji = '🇵🇹';
+                description = 'Based on our comprehensive analysis, Cristiano Ronaldo edges out as the GOAT with superior international goalscoring, physical dominance, clutch performances, and global impact. His longevity and ability to perform at the highest level across multiple leagues gives him the slight advantage.';
+            } else if (overallWinner === 'messi') {
+                winnerText = 'Lionel Messi';
+                winnerEmoji = '🇦🇷';
+                description = 'Based on our comprehensive analysis, Lionel Messi emerges as the GOAT with his record-breaking 8 Ballon d\'Or awards, World Cup triumph, superior playmaking abilities, and consistent excellence. His technical brilliance and team impact give him the edge.';
+            } else {
+                winnerText = 'It\'s a TIE!';
+                winnerEmoji = '⚖️';
+                description = 'After analyzing every possible metric, both legends are impossibly close. They are simply two different types of greatness - Ronaldo the complete athlete and clutch performer, Messi the technical genius and playmaker. Football is blessed to have witnessed both.';
+            }
+            
+            verdictContent.innerHTML = `
+                <div class="verdict-title">
+                    ${winnerEmoji} THE GOAT IS... ${winnerText.toUpperCase()}! ${winnerEmoji}
+                </div>
+                <div class="verdict-content">
+                    ${description}
+                </div>
+                <div class="category-scores">
+                    <div class="category-score">
+                        <h4>🇵🇹 Ronaldo Wins</h4>
+                        <div class="highlight-number" style="color: white;">${scores.ronaldo}</div>
+                        <small>Categories</small>
+                    </div>
+                    <div class="category-score">
+                        <h4>🇦🇷 Messi Wins</h4>
+                        <div class="highlight-number" style="color: white;">${scores.messi}</div>
+                        <small>Categories</small>
+                    </div>
+                </div>
+            `;
+            
+            // Populate verdict table
+            const verdictTable = document.getElementById('verdict-table');
+            const categories = [
+                {category: 'Career Stats', winner: winnerAnalysis.career_stats, factor: 'Goals vs Assists'},
+                {category: 'Club Career', winner: winnerAnalysis.club_career, factor: 'Champions League titles'},
+                {category: 'International', winner: winnerAnalysis.international, factor: 'World Cup vs Goal record'},
+                {category: 'Individual Awards', winner: winnerAnalysis.individual_awards, factor: 'Ballon d\'Or count'},
+                {category: 'Physical Attributes', winner: winnerAnalysis.physical_attributes, factor: 'Overall athleticism'},
+                {category: 'League Performance', winner: winnerAnalysis.league_performance, factor: 'League titles won'},
+                {category: 'Team Influence', winner: winnerAnalysis.team_influence, factor: 'Leadership metrics'},
+                {category: 'Fan Base', winner: winnerAnalysis.fan_base, factor: 'Global following'}
+            ];
+            
+            verdictTable.innerHTML = categories.map(cat => `
+                <tr>
+                    <td><strong>${cat.category}</strong></td>
+                    <td class="${cat.winner}-wins">
+                        ${cat.winner === 'ronaldo' ? '🇵🇹 Ronaldo' : '🇦🇷 Messi'}
+                    </td>
+                    <td>${cat.factor}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function createAllCharts() {
+            // Overview charts
+            createOverviewChart();
+            createAchievementsChart();
+            createOverviewGoalsAssists();
+            createOverviewAwards();
+            
+            // Career stats charts
+            createGoalsAssistsChart();
+            createEfficiencyChart();
+            createDisciplinaryChart();
+            createSpecialGoalsChart();
+            createCareerProgressionChart();
+            createMatchImpactChart();
+            
+            // International charts
+            createInternationalStatsChart();
+            createTournamentChart();
+            createMajorTournamentGoalsChart();
+            createInternationalTimelineChart();
+            
+            // Club career charts
+            createClubGoalsChart();
+            createTrophyChart();
+            createChampionsLeagueChart();
+            createTransferChart();
+            
+            // Individual awards charts
+            createMajorAwardsChart();
+            createBallonDorChart();
+            createAwardTimelineChart();
+            
+            // Physical charts
+            createTechnicalSkillsChart();
+            createPhysicalAttributesChart();
+            createPlayingStyleChart();
+            createSkillEvolutionChart();
+            
+            // League performance charts
+            createLeagueGoalsChart();
+            createLeagueTitlesChart();
+            createLeagueAdaptationChart();
+            
+            // Team influence charts
+            createLeadershipChart();
+            createClutchChart();
+            createTeamImpactChart();
+            
+            // Heat map charts
+            createHeatmapCharts();
+            
+            // Fan base charts
+            createSocialMediaChart();
+            createCommercialChart();
+            createGlobalReachChart();
+            
+            // Season performance charts
+            createBestSeasonsChart();
+            createSeasonTotalChart();
+            createConsistencyChart();
+        }
+        
+        // Chart creation functions
+        function createOverviewChart() {
+            const ctx = document.getElementById('overviewChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Goals', 'Assists', 'Trophies', 'Awards', 'International', 'Longevity'],
+                    datasets: [{
+                        label: 'Ronaldo',
+                        data: [90, 70, 85, 80, 85, 95],
+                        backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                        borderColor: '#e74c3c',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#e74c3c',
+                        pointRadius: 6
+                    }, {
+                        label: 'Messi',
+                        data: [85, 95, 90, 95, 80, 85],
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderColor: '#3498db',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#3498db',
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { stepSize: 20 }
+                        }
+                    },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+        
+        function createAchievementsChart() {
+            const ctx = document.getElementById('achievementsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ronaldo Trophies', 'Messi Trophies'],
+                    datasets: [{
+                        data: [
+                            playerData.ronaldo.club_career.major_trophies,
+                            playerData.messi.club_career.major_trophies
+                        ],
+                        backgroundColor: ['#e74c3c', '#3498db'],
+                        borderWidth: 3,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+        
+        function createOverviewGoalsAssists() {
+            const ctx = document.getElementById('overviewGoalsAssists').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Goals', 'Assists'],
+                    datasets: [{
+                        label: 'Ronaldo',
+                        data: [
+                            playerData.ronaldo.career_stats.total_goals,
+                            playerData.ronaldo.career_stats.total_assists
+                        ],
+                        backgroundColor: '#e74c3c'
+                    }, {
+                        label: 'Messi',
+                        data: [
+                            playerData.messi.career_stats.total_goals,
+                            playerData.messi.career_stats.total_assists
+                        ],
+                        backgroundColor: '#3498db'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'top' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+        
+        function createOverviewAwards() {
+            const ctx = document.getElementById('overviewAwards').getContext('2d');
+            new Chart(ctx, {
+                type: 'polarArea',
+                data: {
+                    labels: ['Ballon d\'Or (CR7)', 'Ballon d\'Or (Messi)', 'Golden Boot (CR7)', 'Golden Boot (Messi)'],
+                    datasets: [{
+                        data: [
+                            playerData.ronaldo.individual_awards.ballon_dor,
+                            playerData.messi.individual_awards.ballon_dor,
+                            playerData.ronaldo.individual_awards.golden_boot,
+                            playerData.messi.individual_awards.golden_boot
+                        ],
+                        backgroundColor: ['#e74c3c', '#3498db', '#c0392b', '#2980b9']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+        
+        function createGoalsAssistsChart() {
+            const ctx = document.getElementById('goalsAssistsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Goals', 'Total Assists', 'Goals + Assists'],
+                    datasets: [{
+                        label: 'Ronaldo',
+                        data: [
+                            playerData.ronaldo.career_stats.total_goals,
+                            playerData.ronaldo.career_stats.total_assists,
+                            playerData.ronaldo.career_stats.total_goals + playerData.ronaldo.career_stats.total_assists
+                        ],
+                        backgroundColor: '#e74c3c'
+                    }, {
+                        label: 'Messi',
+                        data: [
+                            playerData.messi.career_stats.total_goals,
+                            playerData.messi.career_stats.total_assists,
+                            playerData.messi.career_stats.total_goals + playerData.messi.career_stats.total_assists
+                        ],
+                        backgroundColor: '#3498db'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'top' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+        
+        function createHeatmapCharts() {
+            if (!heatmapData.messi || !heatmapData.ronaldo) return;
+            
+            createMessiHeatmap();
+            createRonaldoHeatmap();
+            createPositionalStatsChart();
+            createZoneActivityChart();
+        }
+        
+        function drawSoccerField(ctx, width, height) {
+            const fieldLength = 120;
+            const fieldWidth = 80;
+            const scaleX = width / fieldLength;
+            const scaleY = height / fieldWidth;
+            
+            // Clear canvas and set background
+            ctx.fillStyle = '#2d5016';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Field markings
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            
+            // Field outline
+            ctx.strokeRect(0, 0, width, height);
+            
+            // Center line
+            ctx.beginPath();
+            ctx.moveTo(width / 2, 0);
+            ctx.lineTo(width / 2, height);
+            ctx.stroke();
+            
+            // Center circle
+            ctx.beginPath();
+            ctx.arc(width / 2, height / 2, 9.15 * scaleX, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Center spot
+            ctx.beginPath();
+            ctx.arc(width / 2, height / 2, 2, 0, 2 * Math.PI);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            
+            // Penalty areas
+            const penaltyWidth = 44 * scaleY;
+            const penaltyLength = 16.5 * scaleX;
+            const penaltyTop = (height - penaltyWidth) / 2;
+            
+            // Left penalty area
+            ctx.strokeRect(0, penaltyTop, penaltyLength, penaltyWidth);
+            
+            // Right penalty area
+            ctx.strokeRect(width - penaltyLength, penaltyTop, penaltyLength, penaltyWidth);
+            
+            // Goal areas
+            const goalWidth = 20 * scaleY;
+            const goalLength = 5.5 * scaleX;
+            const goalTop = (height - goalWidth) / 2;
+            
+            // Left goal area
+            ctx.strokeRect(0, goalTop, goalLength, goalWidth);
+            
+            // Right goal area
+            ctx.strokeRect(width - goalLength, goalTop, goalLength, goalWidth);
+            
+            // Penalty spots
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(11 * scaleX, height / 2, 2, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(width - 11 * scaleX, height / 2, 2, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Goals
+            const goalPostWidth = 7.32 * scaleY;
+            const goalPostTop = (height - goalPostWidth) / 2;
+            
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, goalPostTop);
+            ctx.lineTo(0, goalPostTop + goalPostWidth);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(width, goalPostTop);
+            ctx.lineTo(width, goalPostTop + goalPostWidth);
+            ctx.stroke();
+        }
+        
+        function createMessiHeatmap() {
+            const canvas = document.getElementById('messiHeatmapChart');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Draw field
+            drawSoccerField(ctx, width, height);
+            
+            // Draw heatmap
+            const heatmapGrid = heatmapData.messi.heatmap_grid;
+            const gridSize = heatmapGrid.length;
+            const cellWidth = width / gridSize;
+            const cellHeight = height / gridSize;
+            
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const intensity = heatmapGrid[y][x];
+                    if (intensity > 0.1) {
+                        const alpha = Math.min(intensity * 0.8, 0.7);
+                        ctx.fillStyle = `rgba(52, 152, 219, ${alpha})`;
+                        ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                    }
+                }
+            }
+            
+            // Add title overlay
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, width, 40);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Lionel Messi - "The Magician"', width / 2, 25);
+            
+            // Add attack direction arrow
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(width * 0.1, height - 20);
+            ctx.lineTo(width * 0.9, height - 20);
+            ctx.stroke();
+            
+            // Arrow head
+            ctx.beginPath();
+            ctx.moveTo(width * 0.9 - 10, height - 25);
+            ctx.lineTo(width * 0.9, height - 20);
+            ctx.lineTo(width * 0.9 - 10, height - 15);
+            ctx.stroke();
+            
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.fillText('Attack Direction', width / 2, height - 30);
+        }
+        
+        function createRonaldoHeatmap() {
+            const canvas = document.getElementById('ronaldoHeatmapChart');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Draw field
+            drawSoccerField(ctx, width, height);
+            
+            // Draw heatmap
+            const heatmapGrid = heatmapData.ronaldo.heatmap_grid;
+            const gridSize = heatmapGrid.length;
+            const cellWidth = width / gridSize;
+            const cellHeight = height / gridSize;
+            
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const intensity = heatmapGrid[y][x];
+                    if (intensity > 0.1) {
+                        const alpha = Math.min(intensity * 0.8, 0.7);
+                        ctx.fillStyle = `rgba(231, 76, 60, ${alpha})`;
+                        ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                    }
+                }
+            }
+            
+            // Add title overlay
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, width, 40);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Cristiano Ronaldo - "The Goal Machine"', width / 2, 25);
+            
+            // Add attack direction arrow
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(width * 0.1, height - 20);
+            ctx.lineTo(width * 0.9, height - 20);
+            ctx.stroke();
+            
+            // Arrow head
+            ctx.beginPath();
+            ctx.moveTo(width * 0.9 - 10, height - 25);
+            ctx.lineTo(width * 0.9, height - 20);
+            ctx.lineTo(width * 0.9 - 10, height - 15);
+            ctx.stroke();
+            
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.fillText('Attack Direction', width / 2, height - 30);
+        }
+        
+        function createPositionalStatsChart() {
+            const ctx = document.getElementById('positionalStatsChart').getContext('2d');
+            
+            const messiStats = heatmapData.messi.stats;
+            const ronaldoStats = heatmapData.ronaldo.stats;
+            
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Average X Position', 'Final Third %', 'Penalty Area %', 'Field Coverage'],
+                    datasets: [{
+                        label: 'Messi',
+                        data: [
+                            (messiStats.avg_x / 120) * 100,
+                            messiStats.final_third_percent,
+                            messiStats.penalty_area_percent * 3,
+                            80
+                        ],
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderColor: '#3498db',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#3498db',
+                        pointRadius: 5
+                    }, {
+                        label: 'Ronaldo',
+                        data: [
+                            (ronaldoStats.avg_x / 120) * 100,
+                            ronaldoStats.final_third_percent,
+                            ronaldoStats.penalty_area_percent * 3,
+                            70
+                        ],
+                        backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                        borderColor: '#e74c3c',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#e74c3c',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { stepSize: 20 }
+                        }
+                    },
+                    plugins: { legend: { position: 'top' } }
+                }
+            });
+        }
+        
+        function createZoneActivityChart() {
+            const ctx = document.getElementById('zoneActivityChart').getContext('2d');
+            
+            const messiStats = heatmapData.messi.stats;
+            const ronaldoStats = heatmapData.ronaldo.stats;
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Final Third Activity', 'Penalty Area Activity', 'Average Position'],
+                    datasets: [{
+                        label: 'Messi (%)',
+                        data: [
+                            messiStats.final_third_percent,
+                            messiStats.penalty_area_percent,
+                            (messiStats.avg_x / 120) * 100
+                        ],
+                        backgroundColor: '#3498db'
+                    }, {
+                        label: 'Ronaldo (%)',
+                        data: [
+                            ronaldoStats.final_third_percent,
+                            ronaldoStats.penalty_area_percent,
+                            (ronaldoStats.avg_x / 120) * 100
+                        ],
+                        backgroundColor: '#e74c3c'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Percentage (%)' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Simplified placeholder functions for other charts
+        function createEfficiencyChart() { /* Implementation */ }
+        function createDisciplinaryChart() { /* Implementation */ }
+        function createSpecialGoalsChart() { /* Implementation */ }
+        function createCareerProgressionChart() { /* Implementation */ }
+        function createMatchImpactChart() { /* Implementation */ }
+        function createInternationalStatsChart() { /* Implementation */ }
+        function createTournamentChart() { /* Implementation */ }
+        function createMajorTournamentGoalsChart() { /* Implementation */ }
+        function createInternationalTimelineChart() { /* Implementation */ }
+        function createClubGoalsChart() { /* Implementation */ }
+        function createTrophyChart() { /* Implementation */ }
+        function createChampionsLeagueChart() { /* Implementation */ }
+        function createTransferChart() { /* Implementation */ }
+        function createMajorAwardsChart() { /* Implementation */ }
+        function createBallonDorChart() { /* Implementation */ }
+        function createAwardTimelineChart() { /* Implementation */ }
+        function createTechnicalSkillsChart() { /* Implementation */ }
+        function createPhysicalAttributesChart() { /* Implementation */ }
+        function createPlayingStyleChart() { /* Implementation */ }
+        function createSkillEvolutionChart() { /* Implementation */ }
+        function createLeagueGoalsChart() { /* Implementation */ }
+        function createLeagueTitlesChart() { /* Implementation */ }
+        function createLeagueAdaptationChart() { /* Implementation */ }
+        function createLeadershipChart() { /* Implementation */ }
+        function createClutchChart() { /* Implementation */ }
+        function createTeamImpactChart() { /* Implementation */ }
+        function createSocialMediaChart() { /* Implementation */ }
+        function createCommercialChart() { /* Implementation */ }
+        function createGlobalReachChart() { /* Implementation */ }
+        function createBestSeasonsChart() { /* Implementation */ }
+        function createSeasonTotalChart() { /* Implementation */ }
+        function createConsistencyChart() { /* Implementation */ }
+        
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+    </script>
+</body>
+</html>
