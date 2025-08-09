@@ -1,10 +1,29 @@
 import pandas as pd
 import streamlit as st
 
+# ===== Global Arrow-safe Fix =====
+def make_arrow_safe(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Ensure all DataFrame columns are Arrow-compatible:
+    - Converts mixed object columns to numeric if possible (int or float).
+    - If numbers contain decimals, force float64.
+    - Keeps text columns as strings.
+    """
+    for col in df.columns:
+        if df[col].dtype == "object":
+            numeric_df = pd.to_numeric(df[col], errors="coerce")
+            if numeric_df.notna().sum() > 0:  # Found some numeric values
+                if (numeric_df % 1 != 0).any():
+                    df[col] = numeric_df.astype("float64")
+                else:
+                    df[col] = numeric_df.astype("int64")
+            else:
+                df[col] = df[col].astype(str)
+    return df
+
 @st.cache_data
 def load_all_data():
     """Load all data for the GOAT analysis with error handling"""
-    
     try:
         # Achievements data
         achievements = pd.DataFrame({
@@ -97,11 +116,11 @@ def load_all_data():
             'ronaldo': [22, 7, 31, 3, 95]
         })
 
-        # Season by season goals (complete careers 2005-2023)
+        # Season-by-season goals
         years = list(range(2005, 2024))
         messi_goals_by_year = [1, 8, 17, 16, 38, 47, 53, 73, 60, 41, 58, 54, 37, 51, 36, 31, 38, 11, 21]
         ronaldo_goals_by_year = [9, 12, 23, 42, 33, 40, 60, 55, 51, 61, 48, 51, 42, 44, 37, 36, 24, 18, 35]
-        
+
         season_goals = pd.DataFrame({
             'year': years,
             'messiGoals': messi_goals_by_year,
@@ -110,6 +129,7 @@ def load_all_data():
             'ronaldoAssists': [a//3 for a in ronaldo_goals_by_year]
         })
 
+        # Store all datasets
         data_dict = {
             'achievements': achievements,
             'career_stats': career_stats,
@@ -122,24 +142,15 @@ def load_all_data():
             'clutch': clutch,
             'season_goals': season_goals
         }
-        
-        # Log successful data loading
+
+        # ✅ Make all datasets Arrow-safe
+        for key, df in data_dict.items():
+            if isinstance(df, pd.DataFrame):
+                data_dict[key] = make_arrow_safe(df)
+
         st.sidebar.success(f"✅ Data loaded: {len(data_dict)} datasets")
-        
         return data_dict
-        
+
     except Exception as e:
         st.sidebar.error(f"❌ Error loading data: {e}")
-        # Return minimal fallback data
-        return {
-            'career_stats': pd.DataFrame({
-                'player': ['Messi', 'Ronaldo'],
-                'goals': [815, 895],
-                'assists': [377, 236]
-            }),
-            'season_goals': pd.DataFrame({
-                'year': [2020, 2021, 2022, 2023],
-                'messiGoals': [25, 30, 35, 40],
-                'ronaldoGoals': [30, 35, 25, 20]
-            })
-        }
+        return {}
