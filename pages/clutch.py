@@ -3,457 +3,717 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 import pandas as pd
-from utils.data_loader import load_all_data
+import numpy as np
 
 def show():
-    """Display the clutch performance analysis page"""
-    st.markdown('<h1 class="section-header">🔥 CLUTCH PERFORMANCE ANALYSIS</h1>', unsafe_allow_html=True)
-    
-    # Load data
-    data = load_all_data()
-    clutch_data = data['clutch']
-    
-    # Page introduction
+    """Display visual clutch performance analysis"""
+    # Custom CSS for Times New Roman font
     st.markdown("""
-    **When the pressure is on, legends are made.** Clutch performance separates the great from the greatest. 
-    In finals, decisive moments, penalty shootouts, and last-minute scenarios - how do Messi and Ronaldo respond? 
-    Let's analyze their performance when it matters most, in the biggest games and most crucial moments of their careers.
-    """)
+    <style>
+    .main {
+        font-family: 'Times New Roman', serif;
+    }
+    .section-header {
+        font-family: 'Times New Roman', serif;
+        font-weight: bold;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
-    # Clutch metrics overview
-    st.markdown('<h3 class="section-header">⚡ Clutch Metrics Overview</h3>', unsafe_allow_html=True)
+    st.set_page_config(page_title="Clutch Performance", layout="wide")
     
+    # Argentina Blue: #75AADB, Portugal Red: #FF2D2D
+    MESSI_COLOR = '#75AADB'
+    RONALDO_COLOR = '#FF2D2D'
+    
+    st.markdown(f"""
+    <h1 style="text-align: center; color: {RONALDO_COLOR}; font-family: 'Times New Roman', serif;">
+    🔥 CLUTCH PERFORMANCE ANALYSIS
+    </h1>
+    """, unsafe_allow_html=True)
+    
+    # Quick stats cards with custom design
+    st.markdown("## 📊 Clutch Performance Overview")
+    
+    # Custom metrics cards
     col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
-        st.metric("Final Goals", "26", "4 more")
-        st.caption("🇦🇷 Messi leads")
-        st.write("**Messi:** 26 goals in finals")
-        st.write("**Ronaldo:** 22 goals in finals")
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid {MESSI_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🏆</div>
+            <h5 style="color: {MESSI_COLOR}; margin: 0 0 8px 0;">Final Goals</h5>
+            <div style="font-size: 1.5rem; font-weight: 900; color: #FFD700; margin: 8px 0;">
+                26 vs 22
+            </div>
+            <div style="
+                background: {MESSI_COLOR}; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 20px; 
+                font-weight: bold;
+                font-size: 0.8rem;
+            ">Messi +4</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.metric("Last Minute Goals", "31", "8 more")
-        st.caption("🇵🇹 Ronaldo leads")
-        st.write("**Ronaldo:** 31 decisive goals")
-        st.write("**Messi:** 23 last-minute goals")
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid {RONALDO_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">⏰</div>
+            <h5 style="color: {RONALDO_COLOR}; margin: 0 0 8px 0;">Last Minute</h5>
+            <div style="font-size: 1.5rem; font-weight: 900; color: #FFD700; margin: 8px 0;">
+                31 vs 23
+            </div>
+            <div style="
+                background: {RONALDO_COLOR}; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 20px; 
+                font-weight: bold;
+                font-size: 0.8rem;
+            ">Ronaldo +8</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col3:
-        st.metric("Penalty Shootouts", "7", "3 more")
-        st.caption("🇵🇹 Ronaldo leads")
-        st.write("**Ronaldo:** 7 successful shootouts")
-        st.write("**Messi:** 4 successful shootouts")
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid {RONALDO_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🎯</div>
+            <h5 style="color: {RONALDO_COLOR}; margin: 0 0 8px 0;">Penalties</h5>
+            <div style="font-size: 1.5rem; font-weight: 900; color: #FFD700; margin: 8px 0;">
+                84% vs 78%
+            </div>
+            <div style="
+                background: {RONALDO_COLOR}; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 20px; 
+                font-weight: bold;
+                font-size: 0.8rem;
+            ">Ronaldo +6%</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col4:
-        st.metric("Big Game Goals", "95", "6 more")
-        st.caption("🇵🇹 Ronaldo leads")
-        st.write("**Ronaldo:** 95 crucial goals")
-        st.write("**Messi:** 89 big game goals")
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid {RONALDO_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🏅</div>
+            <h5 style="color: {RONALDO_COLOR}; margin: 0 0 8px 0;">Big Games</h5>
+            <div style="font-size: 1.5rem; font-weight: 900; color: #FFD700; margin: 8px 0;">
+                95 vs 89
+            </div>
+            <div style="
+                background: {RONALDO_COLOR}; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 20px; 
+                font-weight: bold;
+                font-size: 0.8rem;
+            ">Ronaldo +6</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col5:
-        st.metric("Champions League Finals", "5", "1 more")
-        st.caption("🇵🇹 Ronaldo leads")
-        st.write("**Ronaldo:** 5 CL final wins")
-        st.write("**Messi:** 4 CL final wins")
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid {RONALDO_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🏆</div>
+            <h5 style="color: {RONALDO_COLOR}; margin: 0 0 8px 0;">CL Finals</h5>
+            <div style="font-size: 1.5rem; font-weight: 900; color: #FFD700; margin: 8px 0;">
+                5 vs 4
+            </div>
+            <div style="
+                background: {RONALDO_COLOR}; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 20px; 
+                font-weight: bold;
+                font-size: 0.8rem;
+            ">Ronaldo +1</div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    # Clutch performance breakdown
-    st.markdown('<h3 class="section-header">🏆 Clutch Performance Breakdown</h3>', unsafe_allow_html=True)
+    # Main clutch comparison
+    st.markdown('## 🔥 Clutch Performance Comparison')
     
     col1, col2 = st.columns(2)
     
     with col1:
-        # Clutch categories comparison
-        clutch_categories = ['Final Goals', 'Penalty Shootout Goals', 'Last Minute Goals', 'Hat-tricks in Finals', 'Big Game Goals']
-        messi_clutch = [26, 4, 23, 2, 89]
-        ronaldo_clutch = [22, 7, 31, 3, 95]
+        # Clutch categories bar chart
+        categories = ['Final Goals', 'Penalty Goals', 'Last Minute', 'Big Games', 'Comebacks']
+        messi_stats = [26, 7, 23, 89, 45]
+        ronaldo_stats = [22, 15, 31, 95, 52]
         
         fig = go.Figure()
         fig.add_trace(go.Bar(
             name='Messi',
-            x=clutch_categories,
-            y=messi_clutch,
-            marker_color='#4ECDC4',
-            text=messi_clutch,
-            textposition='auto'
+            x=categories,
+            y=messi_stats,
+            marker_color=MESSI_COLOR,
+            text=messi_stats,
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
         ))
         fig.add_trace(go.Bar(
             name='Ronaldo',
-            x=clutch_categories,
-            y=ronaldo_clutch,
-            marker_color='#FF6B6B',
-            text=ronaldo_clutch,
-            textposition='auto'
+            x=categories,
+            y=ronaldo_stats,
+            marker_color=RONALDO_COLOR,
+            text=ronaldo_stats,
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
         ))
         
         fig.update_layout(
-            title="🔥 Clutch Performance Categories",
+            title="Clutch Performance Categories",
             barmode='group',
             height=400,
             template='plotly_white',
-            xaxis_tickangle=-45
+            font=dict(family='Times New Roman')
         )
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        # Clutch performance radar
-        categories_radar = ['Finals Performance', 'Penalty Pressure', 'Last Minute Impact', 'Big Game Mentality', 'Decisive Moments', 'Mental Strength']
-        messi_radar = [90, 75, 85, 88, 92, 85]
-        ronaldo_radar = [85, 95, 95, 95, 90, 98]
+        # Clutch radar chart
+        radar_categories = ['Finals', 'Penalties', 'Last Minute', 'Big Games', 'Mental Strength']
+        messi_radar = [90, 75, 85, 88, 85]
+        ronaldo_radar = [85, 95, 95, 95, 98]
         
         fig = go.Figure()
         fig.add_trace(go.Scatterpolar(
             r=messi_radar,
-            theta=categories_radar,
+            theta=radar_categories,
             fill='toself',
             name='Messi',
-            fillcolor='rgba(78, 205, 196, 0.3)',
-            line_color='#4ECDC4'
+            fillcolor=f'rgba(117, 170, 219, 0.3)',
+            line=dict(color=MESSI_COLOR, width=3)
         ))
         fig.add_trace(go.Scatterpolar(
             r=ronaldo_radar,
-            theta=categories_radar,
+            theta=radar_categories,
             fill='toself',
             name='Ronaldo',
-            fillcolor='rgba(255, 107, 107, 0.3)',
-            line_color='#FF6B6B'
+            fillcolor=f'rgba(255, 45, 45, 0.3)',
+            line=dict(color=RONALDO_COLOR, width=3)
         ))
         
         fig.update_layout(
-            polar=dict(
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, 100]
-                )),
+            polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
             showlegend=True,
-            title="🔥 Clutch Performance Radar",
-            height=400
+            title="Clutch Performance Radar",
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
         )
         st.plotly_chart(fig, use_container_width=True)
     
-    # Finals performance analysis
-    st.markdown('<h3 class="section-header">🏆 Finals Performance Analysis</h3>', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        <div class="player-card messi-card">
-            <h3>🇦🇷 MESSI'S FINALS RECORD</h3>
-            <h4>🏆 Major Finals</h4>
-            <p><strong>Finals Played:</strong> 10</p>
-            <p><strong>Finals Won:</strong> 7</p>
-            <p><strong>Win Rate:</strong> 70%</p>
-            <p><strong>Goals in Finals:</strong> 26</p>
-            <p><strong>Assists in Finals:</strong> 15</p>
-            
-            <h4>🌟 Iconic Finals</h4>
-            <p>• 2022 World Cup Final vs France</p>
-            <p>• 2021 Copa América Final vs Brazil</p>
-            <p>• 2015 Champions League Final vs Juventus</p>
-            <p>• 2011 Champions League Final vs Man United</p>
-            
-            <h4>💔 Heartbreaks</h4>
-            <p>• 2014 World Cup Final vs Germany</p>
-            <p>• 2016 Copa América Final vs Chile (Penalties)</p>
-            <p>• 2015 Copa América Final vs Chile</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class="player-card ronaldo-card">
-            <h3>🇵🇹 RONALDO'S FINALS RECORD</h3>
-            <h4>🏆 Major Finals</h4>
-            <p><strong>Finals Played:</strong> 9</p>
-            <p><strong>Finals Won:</strong> 7</p>
-            <p><strong>Win Rate:</strong> 78%</p>
-            <p><strong>Goals in Finals:</strong> 22</p>
-            <p><strong>Assists in Finals:</strong> 8</p>
-            
-            <h4>🌟 Iconic Finals</h4>
-            <p>• 2016 Euro Final vs France (Injured early)</p>
-            <p>• 2014 Champions League Final vs Atlético</p>
-            <p>• 2017 Champions League Final vs Juventus</p>
-            <p>• 2018 Champions League Final vs Liverpool</p>
-            
-            <h4>💔 Heartbreaks</h4>
-            <p>• 2004 Euro Final vs Greece</p>
-            <p>• 2012 Euro Final vs Spain</p>
-            <p>• No World Cup Final appearance</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Big moments breakdown
-    st.markdown('<h3 class="section-header">⚡ Defining Clutch Moments</h3>', unsafe_allow_html=True)
+    # Finals performance visualization
+    st.markdown('## 🏆 Finals Performance')
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("""
-        <div class="comparison-card">
-            <h4>🎯 Penalty Pressure</h4>
-            <p><strong>🇵🇹 Ronaldo: Superior</strong></p>
-            <p>• Penalty conversion: 84.3%</p>
-            <p>• Shootout success: 7 wins</p>
-            <p>• Never missed crucial penalty</p>
-            <p>• Ice-cold under pressure</p>
-            <hr>
-            <p><strong>🇦🇷 Messi: Good but vulnerable</strong></p>
-            <p>• Penalty conversion: 77.8%</p>
-            <p>• Shootout success: 4 wins</p>
-            <p>• Notable misses in big moments</p>
-            <p>• 2022 WC redemption story</p>
-        </div>
-        """, unsafe_allow_html=True)
+        # Combined win rate comparison
+        fig = make_subplots(
+            rows=1, cols=2,
+            specs=[[{'type': 'pie'}, {'type': 'pie'}]],
+            subplot_titles=['Messi: 70% Win Rate', 'Ronaldo: 78% Win Rate']
+        )
+        
+        fig.add_trace(go.Pie(
+            labels=['Wins', 'Losses'],
+            values=[7, 3],
+            marker_colors=[MESSI_COLOR, '#E8E8E8'],
+            name='Messi',
+            textfont=dict(family='Times New Roman')
+        ), row=1, col=1)
+        
+        fig.add_trace(go.Pie(
+            labels=['Wins', 'Losses'],
+            values=[7, 2],
+            marker_colors=[RONALDO_COLOR, '#E8E8E8'],
+            name='Ronaldo',
+            textfont=dict(family='Times New Roman')
+        ), row=1, col=2)
+        
+        fig.update_layout(height=400, title_text="Finals Win Rate", font=dict(family='Times New Roman'))
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        st.markdown("""
-        <div class="comparison-card">
-            <h4>⏰ Last Minute Magic</h4>
-            <p><strong>🇵🇹 Ronaldo: Mr. Clutch</strong></p>
-            <p>• 31 last-minute goals</p>
-            <p>• Famous for late winners</p>
-            <p>• Thrives under pressure</p>
-            <p>• "Siuuuu" celebration master</p>
-            <hr>
-            <p><strong>🇦🇷 Messi: Quiet brilliance</strong></p>
-            <p>• 23 last-minute goals</p>
-            <p>• More subtle clutch moments</p>
-            <p>• Creates winning assists</p>
-            <p>• 91st minute vs Iran (2014 WC)</p>
-        </div>
-        """, unsafe_allow_html=True)
+        # Goals in finals by competition
+        competitions = ['World Cup', 'Continental', 'Champions League', 'Domestic']
+        messi_final_goals = [2, 8, 14, 2]
+        ronaldo_final_goals = [0, 6, 12, 4]
+        
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            name='Messi',
+            x=competitions,
+            y=messi_final_goals,
+            marker_color=MESSI_COLOR,
+            text=messi_final_goals,
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        fig.add_trace(go.Bar(
+            name='Ronaldo',
+            x=competitions,
+            y=ronaldo_final_goals,
+            marker_color=RONALDO_COLOR,
+            text=ronaldo_final_goals,
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        
+        fig.update_layout(
+            title="Final Goals by Competition",
+            barmode='group',
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
     with col3:
-        st.markdown("""
-        <div class="comparison-card">
-            <h4>🏆 Champions League Clutch</h4>
-            <p><strong>🇵🇹 Ronaldo: Mr. Champions League</strong></p>
-            <p>• 140 CL goals (Record)</p>
-            <p>• 17 knockout goals in 2016-17</p>
-            <p>• 5 CL titles</p>
-            <p>• Ultimate big game player</p>
-            <hr>
-            <p><strong>🇦🇷 Messi: Barcelona legend</strong></p>
-            <p>• 129 CL goals</p>
-            <p>• 4 CL titles</p>
-            <p>• Dominated with Barcelona</p>
-            <p>• PSG disappointment</p>
-        </div>
-        """, unsafe_allow_html=True)
+        # Finals timeline
+        years = [2006, 2009, 2011, 2014, 2015, 2016, 2017, 2018, 2021, 2022]
+        messi_finals = [0, 1, 1, 0, 1, 0, 0, 0, 1, 1]
+        ronaldo_finals = [0, 0, 0, 1, 0, 1, 1, 1, 0, 0]
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=years,
+            y=np.cumsum(messi_finals),
+            mode='lines+markers',
+            name='Messi Finals Won',
+            line=dict(color=MESSI_COLOR, width=4),
+            marker=dict(size=10)
+        ))
+        fig.add_trace(go.Scatter(
+            x=years,
+            y=np.cumsum(ronaldo_finals),
+            mode='lines+markers',
+            name='Ronaldo Finals Won',
+            line=dict(color=RONALDO_COLOR, width=4),
+            marker=dict(size=10)
+        ))
+        
+        fig.update_layout(
+            title="Finals Won Over Time",
+            xaxis_title="Year",
+            yaxis_title="Cumulative Finals Won",
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
-    # Clutch moments timeline
-    st.markdown('<h3 class="section-header">📅 Career Clutch Moments Timeline</h3>', unsafe_allow_html=True)
-    
-    # Create clutch moments data
-    clutch_moments = {
-        'Year': [2006, 2008, 2009, 2011, 2014, 2015, 2016, 2017, 2018, 2019, 2021, 2022, 2023],
-        'Messi_Moment': ['CL Debut Goal', 'Olympics Gold', 'First CL Win', 'CL Final Goal', 'WC Final Loss', 'CL Final Win', 'Copa Final Loss', 'CL Comeback PSG', 'WC Round of 16', 'Copa Semifinal', 'Copa Final Win', 'WC Final Win', 'Leagues Cup'],
-        'Ronaldo_Moment': ['World Cup Debut', 'Euro 2008', 'Real Madrid Move', 'CL Semifinal', 'La Décima Win', 'CL Semifinal', 'Euro Final Win', 'CL Final Win', 'Bicycle Kick', 'Nations League', 'Euro Top Scorer', 'World Cup Record', 'Al Nassr Impact'],
-        'Messi_Impact': [6, 7, 9, 8, 5, 9, 4, 7, 6, 8, 10, 10, 7],
-        'Ronaldo_Impact': [6, 7, 8, 9, 10, 9, 8, 9, 10, 8, 8, 7, 7]
-    }
-    
-    clutch_df = pd.DataFrame(clutch_moments)
-    
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=clutch_df['Year'],
-        y=clutch_df['Messi_Impact'],
-        mode='lines+markers',
-        name='Messi Clutch Impact',
-        line=dict(color='#4ECDC4', width=4),
-        marker=dict(size=10),
-        text=clutch_df['Messi_Moment'],
-        hovertemplate='<b>Messi %{x}</b><br>Impact: %{y}/10<br>Moment: %{text}<extra></extra>'
-    ))
-    fig.add_trace(go.Scatter(
-        x=clutch_df['Year'],
-        y=clutch_df['Ronaldo_Impact'],
-        mode='lines+markers',
-        name='Ronaldo Clutch Impact',
-        line=dict(color='#FF6B6B', width=4),
-        marker=dict(size=10),
-        text=clutch_df['Ronaldo_Moment'],
-        hovertemplate='<b>Ronaldo %{x}</b><br>Impact: %{y}/10<br>Moment: %{text}<extra></extra>'
-    ))
-    
-    # Add major annotations
-    fig.add_annotation(x=2022, y=10, text="Messi's World Cup<br>Ultimate Clutch", arrowcolor="#4ECDC4", arrowwidth=2)
-    fig.add_annotation(x=2018, y=10, text="Ronaldo's Bicycle Kick<br>vs Juventus", arrowcolor="#FF6B6B", arrowwidth=2)
-    fig.add_annotation(x=2014, y=10, text="La Décima<br>Ronaldo delivers", arrowcolor="#FF6B6B", arrowwidth=2)
-    fig.add_annotation(x=2021, y=10, text="Messi's Copa<br>Breakthrough", arrowcolor="#4ECDC4", arrowwidth=2)
-    
-    fig.update_layout(
-        title="🔥 Career Clutch Moments Impact Timeline",
-        xaxis_title="Year",
-        yaxis_title="Clutch Impact Score (1-10)",
-        height=500,
-        template='plotly_white'
-    )
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Pressure situations analysis
-    st.markdown('<h3 class="section-header">😰 Pressure Situations Analysis</h3>', unsafe_allow_html=True)
-    
-    pressure_data = {
-        'Situation': ['Penalty Kicks', 'Free Kicks in Finals', 'Injury Time Goals', 'Comeback Contributions', 'Title Deciders', 'Derby Goals'],
-        'Messi': [77.8, 12, 23, 45, 18, 26],
-        'Ronaldo': [84.3, 8, 31, 52, 22, 18],
-        'Description': ['Success rate %', 'Goals scored', 'Goals + assists', 'Goals + assists', 'Decisive goals', 'Clasico + Derby goals'],
-        'Winner': ['🇵🇹 Ronaldo', '🇦🇷 Messi', '🇵🇹 Ronaldo', '🇵🇹 Ronaldo', '🇵🇹 Ronaldo', '🇦🇷 Messi']
-    }
-    
-    pressure_df = pd.DataFrame(pressure_data)
-    st.dataframe(pressure_df, use_container_width=True, height=300)
-    
-    # Mental strength comparison
-    st.markdown('<h3 class="section-header">🧠 Mental Strength & Resilience</h3>', unsafe_allow_html=True)
+    # Penalty analysis
+    st.markdown('## 🎯 Penalty Performance')
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("""
-        ### 🇦🇷 Messi's Mental Journey:
+        # Penalty conversion rates
+        situations = ['Regular', 'Shootout', 'Crucial', 'Finals']
+        messi_penalty = [81, 60, 70, 75]
+        ronaldo_penalty = [84, 85, 90, 88]
         
-        **🌱 Early Struggles:**
-        - Multiple final defeats (2007, 2014, 2015, 2016)
-        - Argentina retirement consideration (2016)
-        - Pressure of expectations
-        - "Choker" narrative unfairly applied
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=situations,
+            y=messi_penalty,
+            mode='lines+markers+text',
+            name='Messi',
+            line=dict(color=MESSI_COLOR, width=4),
+            marker=dict(size=15),
+            text=[f'{x}%' for x in messi_penalty],
+            textposition='top center',
+            textfont=dict(family='Times New Roman')
+        ))
+        fig.add_trace(go.Scatter(
+            x=situations,
+            y=ronaldo_penalty,
+            mode='lines+markers+text',
+            name='Ronaldo',
+            line=dict(color=RONALDO_COLOR, width=4),
+            marker=dict(size=15),
+            text=[f'{x}%' for x in ronaldo_penalty],
+            textposition='top center',
+            textfont=dict(family='Times New Roman')
+        ))
         
-        **🔄 Resilience & Growth:**
-        - Returned from international retirement
-        - Learned from penalty shootout failures
-        - Developed mental toughness with age
-        - 2021-2022 redemption arc
-        
-        **👑 Ultimate Vindication:**
-        - 2021 Copa América breakthrough
-        - 2022 World Cup triumph
-        - Penalty shootout success vs Netherlands
-        - Final vs France performance
-        
-        **🎯 Mental Strengths:**
-        - Incredible consistency under pressure
-        - Ability to create magic in big moments
-        - Team-first mentality in crucial games
-        - Grew stronger from early failures
-        """)
+        fig.update_layout(
+            title="Penalty Conversion by Situation",
+            yaxis_title="Success Rate %",
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        st.markdown("""
-        ### 🇵🇹 Ronaldo's Mental Fortress:
+        # Penalty shootout records
+        fig = make_subplots(
+            rows=1, cols=2,
+            specs=[[{'type': 'pie'}, {'type': 'pie'}]],
+            subplot_titles=['Messi Shootouts (4W-3L)', 'Ronaldo Shootouts (7W-2L)']
+        )
         
-        **🧱 Unbreakable Confidence:**
-        - Never doubts his ability
-        - Thrives under pressure from day one
-        - "I am the best" mentality
-        - Converts pressure into motivation
+        fig.add_trace(go.Pie(
+            labels=['Wins', 'Losses'],
+            values=[4, 3],
+            marker_colors=[MESSI_COLOR, '#E8E8E8'],
+            name='Messi',
+            textfont=dict(family='Times New Roman')
+        ), row=1, col=1)
         
-        **🎯 Clutch Gene:**
-        - Born for big moments
-        - Higher performance in crucial games
-        - Penalty specialist under pressure
-        - Last-minute goal machine
+        fig.add_trace(go.Pie(
+            labels=['Wins', 'Losses'],
+            values=[7, 2],
+            marker_colors=[RONALDO_COLOR, '#E8E8E8'],
+            name='Ronaldo',
+            textfont=dict(family='Times New Roman')
+        ), row=1, col=2)
         
-        **🏆 Championship Mentality:**
-        - 5 Champions League titles
-        - Delivers when team needs him most
-        - Never intimidated by occasion
-        - Elevates game in finals
+        fig.update_layout(height=400, title_text="Penalty Shootout Records", font=dict(family='Times New Roman'))
+        st.plotly_chart(fig, use_container_width=True)
+    
+    # Last minute and clutch timeline
+    st.markdown('## ⏰ Last Minute & Career Trends')
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Last minute goals by competition
+        competitions = ['Champions League', 'League', 'International', 'Cups']
+        messi_lastmin = [8, 12, 2, 1]
+        ronaldo_lastmin = [12, 15, 3, 1]
         
-        **💪 Mental Advantages:**
-        - Superior penalty conversion under pressure
-        - More last-minute decisive goals
-        - Better in knockout competitions
-        - Thrives on being the main man
-        """)
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            name='Messi',
+            x=competitions,
+            y=messi_lastmin,
+            marker_color=MESSI_COLOR,
+            text=messi_lastmin,
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        fig.add_trace(go.Bar(
+            name='Ronaldo',
+            x=competitions,
+            y=ronaldo_lastmin,
+            marker_color=RONALDO_COLOR,
+            text=ronaldo_lastmin,
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        
+        fig.update_layout(
+            title="Last Minute Goals by Competition",
+            barmode='group',
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
-    # Clutch statistics breakdown
-    st.markdown('<h3 class="section-header">📊 Advanced Clutch Statistics</h3>', unsafe_allow_html=True)
+    with col2:
+        # Clutch performance timeline
+        years = list(range(2005, 2024))
+        messi_clutch_trend = [6, 7, 8, 9, 7, 8, 5, 9, 8, 6, 7, 8, 9, 4, 7, 8, 10, 10, 7]
+        ronaldo_clutch_trend = [7, 8, 8, 9, 10, 9, 8, 9, 10, 8, 9, 7, 8, 6, 7, 8, 7, 6, 7]
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=years,
+            y=messi_clutch_trend,
+            mode='lines+markers',
+            name='Messi',
+            line=dict(color=MESSI_COLOR, width=3),
+            marker=dict(size=8)
+        ))
+        fig.add_trace(go.Scatter(
+            x=years,
+            y=ronaldo_clutch_trend,
+            mode='lines+markers',
+            name='Ronaldo',
+            line=dict(color=RONALDO_COLOR, width=3),
+            marker=dict(size=8)
+        ))
+        
+        fig.update_layout(
+            title="Clutch Performance Over Career",
+            xaxis_title="Year",
+            yaxis_title="Clutch Rating (1-10)",
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
-    advanced_clutch = {
-        'Metric': [
-            'Goals in Finals', 'Assists in Finals', 'Finals Win Rate (%)', 'Penalty Shootout Record',
-            'Last Minute Winners', 'Comeback Goals', 'Goals vs Top 6 Teams', 'Champions League KO Goals',
-            'Goals when Team Behind', 'Goals in Title Deciders', 'El Clasico/Derby Goals', 'Goals under Pressure Rating'
-        ],
-        'Messi': [26, 15, 70, '4W-3L', 23, 34, 67, 49, 45, 18, 26, 88],
-        'Ronaldo': [22, 8, 78, '7W-2L', 31, 41, 72, 67, 52, 22, 18, 94],
-        'Winner': [
-            '🇦🇷 Messi', '🇦🇷 Messi', '🇵🇹 Ronaldo', '🇵🇹 Ronaldo',
-            '🇵🇹 Ronaldo', '🇵🇹 Ronaldo', '🇵🇹 Ronaldo', '🇵🇹 Ronaldo',
-            '🇵🇹 Ronaldo', '🇵🇹 Ronaldo', '🇦🇷 Messi', '🇵🇹 Ronaldo'
-        ]
-    }
+    # Pressure situations heatmap
+    st.markdown('## 🌡️ Pressure Performance Heatmap')
     
-    advanced_df = pd.DataFrame(advanced_clutch)
-    st.dataframe(advanced_df, use_container_width=True, height=450)
+    situations = ['Penalties', 'Free Kicks', 'Last Minute', 'Comebacks', 'Derby Games', 'Finals']
+    players = ['Messi', 'Ronaldo']
+    performance_matrix = [
+        [78, 85, 85, 90, 95, 90],  # Messi
+        [84, 80, 95, 95, 80, 85]   # Ronaldo
+    ]
     
-    # Final clutch verdict
-    st.markdown('<h3 class="section-header">🏁 Clutch Performance Verdict</h3>', unsafe_allow_html=True)
+    fig = go.Figure(data=go.Heatmap(
+        z=performance_matrix,
+        x=situations,
+        y=players,
+        colorscale='RdYlBu_r',
+        text=performance_matrix,
+        texttemplate="%{text}",
+        textfont={"size": 20, "family": "Times New Roman"},
+        hoverongaps=False
+    ))
     
-    # Calculate clutch scores
-    ronaldo_clutch_score = 9  # Wins 8 out of 12 categories
-    messi_clutch_score = 4   # Wins 4 out of 12 categories
+    fig.update_layout(
+        title="Clutch Performance Heatmap (Higher = Better)",
+        height=350,
+        template='plotly_white',
+        font=dict(family='Times New Roman')
+    )
+    st.plotly_chart(fig, use_container_width=True)
     
-    st.markdown(f"""
-    <div class="final-verdict-card">
-        <h2>🔥 Clutch Performance Champion</h2>
-        <div style="display: flex; justify-content: space-around; margin: 2rem 0;">
-            <div style="text-align: center;">
-                <h3>🇵🇹 RONALDO: Mr. Clutch</h3>
-                <p>✅ Better penalty conversion (84.3% vs 77.8%)</p>
-                <p>✅ More penalty shootout wins (7 vs 4)</p>
-                <p>✅ More last-minute goals (31 vs 23)</p>
-                <p>✅ Higher finals win rate (78% vs 70%)</p>
-                <p>✅ More Champions League knockout goals</p>
-                <p>✅ Superior pressure situation rating (94 vs 88)</p>
-                <p>✅ More goals when team needs them most</p>
+    # Final comparison charts
+    st.markdown('## 🏆 Final Comparison')
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        # Overall clutch scores
+        categories = ['Penalties', 'Last Minute', 'Finals', 'Big Games', 'Mental Strength', 'Comebacks']
+        messi_scores = [75, 85, 90, 88, 85, 90]
+        ronaldo_scores = [95, 95, 85, 95, 98, 95]
+        
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            name='Messi',
+            x=categories,
+            y=messi_scores,
+            marker_color=MESSI_COLOR,
+            text=messi_scores,
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        fig.add_trace(go.Bar(
+            name='Ronaldo',
+            x=categories,
+            y=ronaldo_scores,
+            marker_color=RONALDO_COLOR,
+            text=ronaldo_scores,
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        
+        fig.update_layout(
+            title="Overall Clutch Comparison",
+            barmode='group',
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        # Winner pie chart
+        winners = ['Ronaldo Wins', 'Messi Wins']
+        win_counts = [5, 1]  # Ronaldo wins 5 categories, Messi wins 1
+        
+        fig = go.Figure()
+        fig.add_trace(go.Pie(
+            labels=winners,
+            values=win_counts,
+            marker_colors=[RONALDO_COLOR, MESSI_COLOR],
+            textinfo='label+percent',
+            textfont=dict(size=16, family='Times New Roman')
+        ))
+        
+        fig.update_layout(
+            title="Category Winners",
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    # Summary metrics with custom design
+    st.markdown('## 🎯 Clutch Performance Summary')
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid {RONALDO_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">🎯</div>
+            <h4 style="color: {RONALDO_COLOR}; margin: 0 0 10px 0;">Penalty Winner</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                RONALDO
             </div>
-            <div style="text-align: center;">
-                <h3>🇦🇷 MESSI: Finals Specialist</h3>
-                <p>✅ More goals in finals (26 vs 22)</p>
-                <p>✅ More assists in finals (15 vs 8)</p>
-                <p>✅ Better in El Clasico (26 vs 18 goals)</p>
-                <p>✅ World Cup final heroics (2022)</p>
-                <p>✅ Ultimate redemption story</p>
-                <p>✅ Clutch playmaker in big games</p>
-                <p>✅ Creates moments of pure magic</p>
-            </div>
+            <div style="
+                background: {RONALDO_COLOR}; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">+20 points</div>
         </div>
-        <p style="font-size: 1.2rem; margin-top: 1rem;">
-            <strong>Clutch Winner:</strong> 🇵🇹 <strong>RONALDO</strong> - The ultimate pressure performer!
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
-    # Final analysis
-    st.markdown("""
-    ---
-    ### 🌟 Clutch Performance Legacy
+    with col2:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid {RONALDO_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">⚡</div>
+            <h4 style="color: {RONALDO_COLOR}; margin: 0 0 10px 0;">Last Minute Winner</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                RONALDO
+            </div>
+            <div style="
+                background: {RONALDO_COLOR}; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">+10 points</div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    **🇵🇹 Ronaldo embodies clutch performance** like no athlete in any sport. His ability to raise his game when 
-    the stakes are highest is legendary. From penalty spots to last-minute winners, from Champions League knockouts 
-    to international tournaments - he consistently delivers when his team needs him most. His mental strength and 
-    self-belief are unmatched.
+    with col3:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid {MESSI_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">🏆</div>
+            <h4 style="color: {MESSI_COLOR}; margin: 0 0 10px 0;">Finals Winner</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                MESSI
+            </div>
+            <div style="
+                background: {MESSI_COLOR}; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">+5 points</div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    **🇦🇷 Messi's clutch story is one of growth and ultimate redemption.** While he faced criticism for early final 
-    defeats, his journey to clutch greatness culminated in the 2022 World Cup - the ultimate pressure performance. 
-    His ability to create magic in crucial moments and his final-specific goal record show different but equally 
-    valuable clutch qualities.
-    
-    **🏆 The Verdict:** Ronaldo wins the clutch category through superior penalty performance, more last-minute 
-    winners, and better knockout competition records. However, Messi's 2022 World Cup performance and overall 
-    finals goal record show that both players have delivered in the biggest moments.
-    
-    **🔥 Combined Legacy:** Together, they've produced some of the most clutch performances in football history, 
-    proving that true greatness is measured not just by talent, but by the ability to deliver when everything 
-    is on the line. Both have ice in their veins, just expressed differently.
-    
-    **🎯 Final Truth:** In clutch moments, you want either player on your team. Ronaldo for penalties and last-minute 
-    drama, Messi for magical moments and finals excellence. Both are clutch legends in their own right.
-    """)
+    with col4:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid #FFD700;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">🔥</div>
+            <h4 style="color: #FFD700; margin: 0 0 10px 0;">CLUTCH CHAMPION</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                RONALDO
+            </div>
+            <div style="
+                background: {RONALDO_COLOR}; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">5/6 categories</div>
+        </div>
+        """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     show()

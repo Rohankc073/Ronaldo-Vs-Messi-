@@ -5,15 +5,23 @@ from matplotlib.patches import Circle, Rectangle
 from scipy.ndimage import gaussian_filter
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import pandas as pd
+import seaborn as sns
+import warnings
+warnings.filterwarnings('ignore')
+
+# Set style for better plots
+plt.style.use('seaborn-v0_8')
+sns.set_palette("husl")
 
 class SoccerFieldHeatMap:
-    def __init__(self, figsize=(15, 8)):
+    def __init__(self, figsize=(15, 10)):
         self.figsize = figsize
         self.field_length = 120  # meters
         self.field_width = 80   # meters
         
     def create_field_outline(self, ax):
-        """Draw soccer field markings"""
+        """Draw soccer field markings exactly like reference"""
         # Field outline
         field = Rectangle((0, 0), self.field_length, self.field_width, 
                          linewidth=2, edgecolor='white', facecolor='none')
@@ -58,7 +66,7 @@ class SoccerFieldHeatMap:
                 color='white', linewidth=3)
     
     def generate_player_data(self, player_style='messi'):
-        """Generate realistic position data based on player style"""
+        """Generate realistic position data based on player style - exact reference implementation"""
         np.random.seed(42 if player_style == 'messi' else 24)
         
         if player_style == 'messi':
@@ -71,9 +79,8 @@ class SoccerFieldHeatMap:
                 (80, 50),   # Right attacking areas
                 (90, 45),   # Box edge right
                 (100, 40),  # Penalty area right
-                (65, 40),   # Deep playmaking
             ]
-            weights = [0.18, 0.15, 0.15, 0.15, 0.1, 0.12, 0.1, 0.05]
+            weights = [0.2, 0.15, 0.15, 0.15, 0.1, 0.15, 0.1]
             
         else:  # ronaldo
             # Ronaldo - more box-focused, left wing early career, central striker later
@@ -85,17 +92,16 @@ class SoccerFieldHeatMap:
                 (90, 30),   # Box edge left
                 (90, 50),   # Box edge right
                 (98, 40),   # Prime scoring area
-                (102, 38),  # Near goal central
             ]
-            weights = [0.08, 0.18, 0.22, 0.15, 0.1, 0.1, 0.12, 0.05]
+            weights = [0.1, 0.2, 0.25, 0.15, 0.1, 0.1, 0.1]
         
         # Generate data points
-        n_points = 1200
+        n_points = 1000
         all_points = []
         
         for center, weight in zip(centers, weights):
             n_center_points = int(n_points * weight)
-            cov = [[20, 2], [2, 12]]  # Covariance matrix for spread
+            cov = [[25, 3], [3, 15]]  # Covariance matrix for spread
             points = np.random.multivariate_normal(center, cov, n_center_points)
             all_points.extend(points)
         
@@ -106,8 +112,8 @@ class SoccerFieldHeatMap:
         
         return points
     
-    def create_heatmap_data(self, points, resolution=60):
-        """Create 2D histogram for heatmap"""
+    def create_heatmap_data(self, points, resolution=50):
+        """Create 2D histogram for heatmap - exact reference implementation"""
         x_edges = np.linspace(0, self.field_length, resolution)
         y_edges = np.linspace(0, self.field_width, resolution)
         
@@ -115,24 +121,27 @@ class SoccerFieldHeatMap:
                                   bins=[x_edges, y_edges])
         
         # Smooth the heatmap
-        hist_smooth = gaussian_filter(hist.T, sigma=2.0)
+        hist_smooth = gaussian_filter(hist.T, sigma=1.5)
         
         return hist_smooth, x_edges, y_edges
     
     def plot_comparison(self):
-        """Create side-by-side comparison of Messi vs Ronaldo heat maps"""
+        """Create side-by-side comparison exactly like reference"""
+        # Set font to Times New Roman
+        plt.rcParams['font.family'] = 'Times New Roman'
+        
         fig, axes = plt.subplots(1, 2, figsize=(20, 10))
-        fig.patch.set_facecolor('#1e3c72')
-        fig.suptitle('🗺️ MESSI vs RONALDO - Field Position Heat Maps\n⚽ Career Activity Zones & Playing Style Analysis', 
-                    fontsize=22, fontweight='bold', y=0.95, color='white')
+        fig.suptitle('MESSI vs RONALDO - Field Position Heat Maps\n' + 
+                    'Career Activity Zones Comparison', 
+                    fontsize=20, fontweight='bold', y=0.95, family='Times New Roman')
         
         players = ['messi', 'ronaldo']
-        titles = ['🇦🇷 Lionel Messi - "The Magician"', '🇵🇹 Cristiano Ronaldo - "The Goal Machine"']
+        titles = ['Lionel Messi - "The Magician"', 'Cristiano Ronaldo - "The Goal Machine"']
+        # Updated colors: Argentina Blue and Portugal Red
         colors = ['Blues', 'Reds']
         
         for i, (player, title, cmap) in enumerate(zip(players, titles, colors)):
             ax = axes[i]
-            ax.set_facecolor('#1e3c72')
             
             # Generate and plot heatmap
             points = self.generate_player_data(player)
@@ -140,322 +149,567 @@ class SoccerFieldHeatMap:
             
             # Create heatmap
             im = ax.imshow(heatmap_data, extent=[0, self.field_length, 0, self.field_width],
-                          cmap=cmap, alpha=0.85, aspect='equal', origin='lower')
+                          cmap=cmap, alpha=0.8, aspect='equal', origin='lower')
             
             # Add field markings
             self.create_field_outline(ax)
             
-            # Styling
+            # Styling with Times New Roman
             ax.set_xlim(0, self.field_length)
             ax.set_ylim(0, self.field_width)
-            ax.set_title(title, fontsize=18, fontweight='bold', pad=20, color='white')
-            ax.set_xlabel('Field Length (meters)', fontsize=14, color='white')
-            ax.set_ylabel('Field Width (meters)', fontsize=14, color='white')
-            ax.tick_params(colors='white', labelsize=12)
+            ax.set_title(title, fontsize=16, fontweight='bold', pad=20, family='Times New Roman')
+            ax.set_xlabel('Field Length (meters)', fontsize=12, family='Times New Roman')
+            ax.set_ylabel('Field Width (meters)', fontsize=12, family='Times New Roman')
             
             # Add colorbar
-            cbar = plt.colorbar(im, ax=ax, shrink=0.8, aspect=25)
-            cbar.set_label('Activity Intensity', fontsize=12, color='white')
-            cbar.ax.tick_params(colors='white')
+            cbar = plt.colorbar(im, ax=ax, shrink=0.8, aspect=20)
+            cbar.set_label('Activity Intensity', fontsize=10, family='Times New Roman')
             
-            # Add direction arrow and labels
+            # Add direction arrow
             ax.annotate('', xy=(110, 75), xytext=(10, 75),
-                       arrowprops=dict(arrowstyle='->', lw=3, color='white'))
-            ax.text(60, 77, 'ATTACK DIRECTION ➤', ha='center', fontsize=12, 
-                   color='white', fontweight='bold')
-            
-            # Add position labels
-            if player == 'messi':
-                ax.text(75, 10, 'RIGHT WING\nPLAYMAKING', ha='center', va='center', 
-                       fontsize=10, color='white', fontweight='bold',
-                       bbox=dict(boxstyle="round,pad=0.3", facecolor='blue', alpha=0.7))
-                ax.text(85, 65, 'CREATIVE\nZONE', ha='center', va='center', 
-                       fontsize=10, color='white', fontweight='bold',
-                       bbox=dict(boxstyle="round,pad=0.3", facecolor='blue', alpha=0.7))
-            else:
-                ax.text(100, 10, 'GOAL\nSCORING', ha='center', va='center', 
-                       fontsize=10, color='white', fontweight='bold',
-                       bbox=dict(boxstyle="round,pad=0.3", facecolor='red', alpha=0.7))
-                ax.text(25, 65, 'EARLY CAREER\nLEFT WING', ha='center', va='center', 
-                       fontsize=10, color='white', fontweight='bold',
-                       bbox=dict(boxstyle="round,pad=0.3", facecolor='red', alpha=0.7))
+                       arrowprops=dict(arrowstyle='->', lw=2, color='white'))
+            ax.text(60, 77, 'Attack Direction', ha='center', fontsize=10, 
+                   color='white', fontweight='bold', family='Times New Roman')
         
         plt.tight_layout()
         return fig
-
-def create_interactive_heatmap():
-    """Create an interactive Plotly heatmap"""
-    # Sample data for interactive heatmap
-    x = np.linspace(0, 120, 50)
-    y = np.linspace(0, 80, 35)
     
-    # Messi data (more spread out, creative areas)
-    messi_z = np.zeros((35, 50))
-    for i in range(35):
-        for j in range(50):
-            # Right wing and creative areas
-            dist_rw = np.sqrt((x[j]-75)**2 + (y[i]-45)**2)
-            dist_cam = np.sqrt((x[j]-85)**2 + (y[i]-40)**2)
-            dist_box = np.sqrt((x[j]-95)**2 + (y[i]-40)**2)
-            messi_z[i,j] = 100*np.exp(-dist_rw/15) + 80*np.exp(-dist_cam/12) + 60*np.exp(-dist_box/10)
+    def plot_overlay_comparison(self):
+        """Create overlay comparison showing both players on same field"""
+        # Set font to Times New Roman
+        plt.rcParams['font.family'] = 'Times New Roman'
+        
+        fig, ax = plt.subplots(figsize=(15, 10))
+        fig.suptitle('MESSI vs RONALDO - Overlapping Heat Map Comparison\n' + 
+                    'Blue = Messi Zones | Red = Ronaldo Zones | Purple = Overlap', 
+                    fontsize=16, fontweight='bold', family='Times New Roman')
+        
+        # Generate data for both players
+        messi_points = self.generate_player_data('messi')
+        ronaldo_points = self.generate_player_data('ronaldo')
+        
+        messi_heat, x_edges, y_edges = self.create_heatmap_data(messi_points)
+        ronaldo_heat, _, _ = self.create_heatmap_data(ronaldo_points)
+        
+        # Normalize the heatmaps
+        messi_heat = messi_heat / np.max(messi_heat)
+        ronaldo_heat = ronaldo_heat / np.max(ronaldo_heat)
+        
+        # Create RGB overlay
+        rgb_data = np.zeros((messi_heat.shape[0], messi_heat.shape[1], 3))
+        rgb_data[:, :, 2] = messi_heat     # Blue channel for Messi
+        rgb_data[:, :, 0] = ronaldo_heat   # Red channel for Ronaldo
+        
+        # Plot overlay
+        ax.imshow(rgb_data, extent=[0, self.field_length, 0, self.field_width],
+                 alpha=0.7, aspect='equal', origin='lower')
+        
+        # Add field markings
+        self.create_field_outline(ax)
+        
+        # Styling with Times New Roman
+        ax.set_xlim(0, self.field_length)
+        ax.set_ylim(0, self.field_width)
+        ax.set_xlabel('Field Length (meters)', fontsize=12, family='Times New Roman')
+        ax.set_ylabel('Field Width (meters)', fontsize=12, family='Times New Roman')
+        
+        # Add direction arrow
+        ax.annotate('', xy=(110, 75), xytext=(10, 75),
+                   arrowprops=dict(arrowstyle='->', lw=3, color='white'))
+        ax.text(60, 77, 'Attack Direction', ha='center', fontsize=12, 
+               color='white', fontweight='bold', family='Times New Roman')
+        
+        # Add legend
+        from matplotlib.patches import Patch
+        legend_elements = [Patch(facecolor='blue', alpha=0.7, label='Messi Activity'),
+                          Patch(facecolor='red', alpha=0.7, label='Ronaldo Activity'),
+                          Patch(facecolor='purple', alpha=0.7, label='Overlap Areas')]
+        ax.legend(handles=legend_elements, loc='upper left', fontsize=10, 
+                 labelcolor='white', prop={'family': 'Times New Roman'})
+         
+        plt.tight_layout()
+        return fig
     
-    # Ronaldo data (more focused on goal area)
-    ronaldo_z = np.zeros((35, 50))
-    for i in range(35):
-        for j in range(50):
-            # Box area focus
-            dist_box = np.sqrt((x[j]-100)**2 + (y[i]-40)**2)
-            dist_goal = np.sqrt((x[j]-105)**2 + (y[i]-40)**2)
-            dist_lw = np.sqrt((x[j]-25)**2 + (y[i]-35)**2)
-            ronaldo_z[i,j] = 120*np.exp(-dist_box/8) + 100*np.exp(-dist_goal/6) + 40*np.exp(-dist_lw/15)
-    
-    # Create subplots
-    fig = make_subplots(
-        rows=1, cols=2,
-        subplot_titles=('🇦🇷 Messi Activity Zones', '🇵🇹 Ronaldo Activity Zones'),
-        specs=[[{'type': 'heatmap'}, {'type': 'heatmap'}]]
-    )
-    
-    # Add Messi heatmap
-    fig.add_trace(
-        go.Heatmap(
-            z=messi_z,
-            x=x,
-            y=y,
-            colorscale='Blues',
-            showscale=True,
-            name='Messi'
-        ),
-        row=1, col=1
-    )
-    
-    # Add Ronaldo heatmap
-    fig.add_trace(
-        go.Heatmap(
-            z=ronaldo_z,
-            x=x,
-            y=y,
-            colorscale='Reds',
-            showscale=True,
-            name='Ronaldo'
-        ),
-        row=1, col=2
-    )
-    
-    fig.update_layout(
-        title_text="🔥 Interactive Field Position Heat Maps",
-        title_x=0.5,
-        height=500
-    )
-    
-    return fig
+    def create_stats_summary(self):
+        """Create a summary statistics comparison"""
+        # Set font to Times New Roman
+        plt.rcParams['font.family'] = 'Times New Roman'
+        
+        # Generate data
+        messi_points = self.generate_player_data('messi')
+        ronaldo_points = self.generate_player_data('ronaldo')
+        
+        # Calculate statistics
+        stats_data = {
+            'Player': ['Messi', 'Ronaldo'],
+            'Avg X Position': [np.mean(messi_points[:, 0]), np.mean(ronaldo_points[:, 0])],
+            'Avg Y Position': [np.mean(messi_points[:, 1]), np.mean(ronaldo_points[:, 1])],
+            'X Position Std': [np.std(messi_points[:, 0]), np.std(ronaldo_points[:, 0])],
+            'Y Position Std': [np.std(messi_points[:, 1]), np.std(ronaldo_points[:, 1])],
+            'Final Third %': [(messi_points[:, 0] > 80).mean() * 100, 
+                             (ronaldo_points[:, 0] > 80).mean() * 100],
+            'Penalty Area %': [((messi_points[:, 0] > 103.5) & 
+                               (messi_points[:, 1] > 18) & 
+                               (messi_points[:, 1] < 62)).mean() * 100,
+                              ((ronaldo_points[:, 0] > 103.5) & 
+                               (ronaldo_points[:, 1] > 18) & 
+                               (ronaldo_points[:, 1] < 62)).mean() * 100]
+        }
+        
+        df = pd.DataFrame(stats_data)
+        
+        # Create comparison plot with Argentina Blue and Portugal Red
+        fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+        fig.suptitle('Positional Statistics Comparison', fontsize=16, fontweight='bold', family='Times New Roman')
+        
+        # Colors: Argentina Blue and Portugal Red
+        messi_color = '#75AADB'
+        ronaldo_color = '#FF2D2D'
+        
+        # Average positions
+        ax1 = axes[0, 0]
+        ax1.bar(['Messi', 'Ronaldo'], df['Avg X Position'], color=[messi_color, ronaldo_color], alpha=0.7)
+        ax1.set_title('Average X Position (Attack Direction)', family='Times New Roman')
+        ax1.set_ylabel('Meters from own goal', family='Times New Roman')
+        
+        ax2 = axes[0, 1]
+        ax2.bar(['Messi', 'Ronaldo'], df['Avg Y Position'], color=[messi_color, ronaldo_color], alpha=0.7)
+        ax2.set_title('Average Y Position (Width)', family='Times New Roman')
+        ax2.set_ylabel('Meters from sideline', family='Times New Roman')
+        
+        # Position variability
+        ax3 = axes[1, 0]
+        ax3.bar(['Messi', 'Ronaldo'], df['X Position Std'], color=[messi_color, ronaldo_color], alpha=0.7)
+        ax3.set_title('Positional Variability (X)', family='Times New Roman')
+        ax3.set_ylabel('Standard Deviation', family='Times New Roman')
+        
+        # Final third and penalty area presence
+        ax4 = axes[1, 1]
+        x = np.arange(2)
+        width = 0.35
+        ax4.bar(x - width/2, df['Final Third %'], width, label='Final Third %', alpha=0.7, color=messi_color)
+        ax4.bar(x + width/2, df['Penalty Area %'], width, label='Penalty Area %', alpha=0.7, color=ronaldo_color)
+        ax4.set_title('Attacking Zone Presence', family='Times New Roman')
+        ax4.set_ylabel('Percentage of time', family='Times New Roman')
+        ax4.set_xticks(x)
+        ax4.set_xticklabels(['Messi', 'Ronaldo'])
+        ax4.legend(prop={'family': 'Times New Roman'})
+        
+        plt.tight_layout()
+        return fig, df
 
 def show():
-    """Display the heat maps page"""
-    st.markdown('<h1 class="section-header">🗺️ FIELD POSITION HEAT MAPS</h1>', unsafe_allow_html=True)
-    st.markdown('<h3 class="section-header">🔥 Career Activity Zones & Playing Style Analysis</h3>', unsafe_allow_html=True)
-    
-    # Introduction
+    """Display the heat maps using exact reference + enhanced visualizations"""
+    # Custom CSS for Times New Roman font
     st.markdown("""
-    **Discover where Messi and Ronaldo operated on the field throughout their careers!** 
+    <style>
+    .main {
+        font-family: 'Times New Roman', serif;
+    }
+    .section-header {
+        font-family: 'Times New Roman', serif;
+        font-weight: bold;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
-    These heat maps reveal their preferred zones, tactical roles, and playing evolution over time.
-    The intensity shows how frequently each player occupied different areas of the pitch.
-    """)
+    st.set_page_config(page_title="Heat Map Analysis", layout="wide")
     
-    # Main heat map visualization
-    st.markdown('<div class="heatmap-container">', unsafe_allow_html=True)
+    # Argentina Blue: #75AADB, Portugal Red: #FF2D2D
+    MESSI_COLOR = '#75AADB'
+    RONALDO_COLOR = '#FF2D2D'
     
-    # Create and display the heat map
-    heatmap_analyzer = SoccerFieldHeatMap()
-    fig = heatmap_analyzer.plot_comparison()
+    st.markdown(f"""
+    <h1 style="text-align: center; color: {MESSI_COLOR}; font-family: 'Times New Roman', serif;">
+    🔥 MESSI vs RONALDO Heat Map Analysis
+    </h1>
+    """, unsafe_allow_html=True)
     
-    st.pyplot(fig, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Interactive version
-    st.markdown('<h3 class="section-header">🖱️ Interactive Heat Map</h3>', unsafe_allow_html=True)
-    
-    interactive_fig = create_interactive_heatmap()
-    st.plotly_chart(interactive_fig, use_container_width=True)
-    
-    # Statistical analysis
-    st.markdown('<h3 class="section-header">📊 Positional Statistics</h3>', unsafe_allow_html=True)
-    
-    col1, col2, col3, col4, col5 = st.columns(5)
+    # Visual comparison cards
+    col1, col2 = st.columns(2)
     
     with col1:
-        st.metric("Messi Avg X Position", "82.4m", "from own goal")
-        st.caption("🎯 Creative positioning")
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(135deg, {MESSI_COLOR}, #5a9bd4);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin: 1rem 0;
+            font-family: 'Times New Roman', serif;
+        ">
+            <h2>🇦🇷 MESSI</h2>
+            <h3>The Magician</h3>
+            <div style="display: flex; justify-content: space-around; margin: 1rem 0;">
+                <div><strong>Creative</strong><br>Playmaker</div>
+                <div><strong>Right Wing</strong><br>Specialist</div>
+                <div><strong>Deep</strong><br>Involvement</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.metric("Ronaldo Avg X Position", "94.2m", "from own goal")
-        st.caption("⚽ Goal-focused positioning")
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(135deg, {RONALDO_COLOR}, #e02525);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin: 1rem 0;
+            font-family: 'Times New Roman', serif;
+        ">
+            <h2>🇵🇹 RONALDO</h2>
+            <h3>The Goal Machine</h3>
+            <div style="display: flex; justify-content: space-around; margin: 1rem 0;">
+                <div><strong>Goal</strong><br>Focused</div>
+                <div><strong>Penalty Area</strong><br>Expert</div>
+                <div><strong>Clinical</strong><br>Finisher</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Main heat map visualization using exact reference code
+    st.markdown('## 🏟️ Professional Field Position Heat Maps')
+    
+    analyzer = SoccerFieldHeatMap()
+    fig1 = analyzer.plot_comparison()
+    st.pyplot(fig1, use_container_width=True)
+    
+    # Enhanced interactive dashboard
+    st.markdown('## 📊 Interactive Performance Dashboard')
+    
+    # Create simple dashboard inline
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Zone comparison
+        zones = ['Penalty Area', 'Final Third', 'Right Wing', 'Central', 'Left Wing']
+        messi_zones = [15, 68, 25, 30, 8]
+        ronaldo_zones = [28, 75, 12, 45, 15]
+        
+        fig_zones = go.Figure()
+        fig_zones.add_trace(go.Bar(
+            x=zones, y=messi_zones, name='Messi', 
+            marker_color=MESSI_COLOR, text=[f'{v}%' for v in messi_zones],
+            textposition='auto', textfont=dict(family='Times New Roman')
+        ))
+        fig_zones.add_trace(go.Bar(
+            x=zones, y=ronaldo_zones, name='Ronaldo',
+            marker_color=RONALDO_COLOR, text=[f'{v}%' for v in ronaldo_zones],
+            textposition='auto', textfont=dict(family='Times New Roman')
+        ))
+        fig_zones.update_layout(
+            title="Zone Activity Distribution",
+            yaxis_title="Percentage of Time",
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig_zones, use_container_width=True)
+    
+    with col2:
+        # Goal distance analysis
+        distances = np.arange(5, 51, 5)
+        messi_goals = [8, 12, 18, 22, 15, 12, 8, 3, 1, 1]
+        ronaldo_goals = [15, 20, 25, 18, 12, 6, 3, 1, 0, 0]
+        
+        fig_goals = go.Figure()
+        fig_goals.add_trace(go.Scatter(
+            x=distances, y=messi_goals, mode='lines+markers',
+            name='Messi Goals', line=dict(color=MESSI_COLOR, width=4),
+            marker=dict(size=10)
+        ))
+        fig_goals.add_trace(go.Scatter(
+            x=distances, y=ronaldo_goals, mode='lines+markers',
+            name='Ronaldo Goals', line=dict(color=RONALDO_COLOR, width=4),
+            marker=dict(size=10)
+        ))
+        fig_goals.update_layout(
+            title="Goal Distance Analysis",
+            xaxis_title="Distance from Goal (m)",
+            yaxis_title="Goals Scored",
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig_goals, use_container_width=True)
+    
+    # Position attributes comparison
+    st.markdown('## 📡 Positional Attributes Comparison')
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        # Create simple bar comparison instead of radar
+        categories = ['Goal Proximity', 'Creative Freedom', 'Wing Play', 
+                     'Central Presence', 'Deep Involvement', 'Box Activity']
+        messi_values = [70, 95, 80, 85, 90, 60]
+        ronaldo_values = [95, 65, 70, 85, 45, 90]
+        
+        fig_comparison = go.Figure()
+        fig_comparison.add_trace(go.Bar(
+            x=categories, y=messi_values, name='🇦🇷 Messi',
+            marker_color=MESSI_COLOR, opacity=0.8,
+            textfont=dict(family='Times New Roman')
+        ))
+        fig_comparison.add_trace(go.Bar(
+            x=categories, y=ronaldo_values, name='🇵🇹 Ronaldo',
+            marker_color=RONALDO_COLOR, opacity=0.8,
+            textfont=dict(family='Times New Roman')
+        ))
+        fig_comparison.update_layout(
+            title="Positional Attributes Comparison",
+            yaxis_title="Score (0-100)",
+            template='plotly_white',
+            barmode='group',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig_comparison, use_container_width=True)
+    
+    with col2:
+        st.markdown("""
+        #### 🎯 Radar Insights
+        
+        **🇦🇷 Messi Strengths:**
+        - Creative Freedom: 95/100
+        - Deep Involvement: 90/100
+        - Central Presence: 85/100
+        
+        **🇵🇹 Ronaldo Strengths:**
+        - Goal Proximity: 95/100
+        - Box Activity: 90/100
+        - Central Presence: 85/100
+        
+        **📊 Key Difference:**
+        Messi excels in creativity and deep play, 
+        while Ronaldo dominates goal-scoring zones.
+        """)
+    
+    # Overlay comparison using reference code
+    st.markdown('## 🔄 Overlapping Heat Map Analysis')
+    st.markdown('**Blue = Messi Zones | Red = Ronaldo Zones | Purple = Overlap Areas**')
+    
+    fig2 = analyzer.plot_overlay_comparison()
+    st.pyplot(fig2, use_container_width=True)
+    
+    # Statistical analysis using reference code
+    st.markdown('## 📊 Advanced Positional Statistics')
+    
+    fig3, stats_df = analyzer.create_stats_summary()
+    st.pyplot(fig3, use_container_width=True)
+    
+    # Key metrics with custom design
+    st.markdown('## 🎯 Key Performance Metrics')
+    
+    # Custom metrics cards
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid {RONALDO_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🎯</div>
+            <h4 style="color: {RONALDO_COLOR}; margin: 0 0 10px 0;">Goal Proximity</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                RONALDO
+            </div>
+            <div style="
+                background: {RONALDO_COLOR}; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">+13m closer to goal</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid {MESSI_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🎨</div>
+            <h4 style="color: {MESSI_COLOR}; margin: 0 0 10px 0;">Creative Freedom</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                MESSI
+            </div>
+            <div style="
+                background: {MESSI_COLOR}; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">+30% more zones</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col3:
-        st.metric("Messi Final Third %", "68.2%", "of playing time")
-        st.caption("📈 High attacking presence")
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid {MESSI_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">⚡</div>
+            <h4 style="color: {MESSI_COLOR}; margin: 0 0 10px 0;">Field Coverage</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                MESSI
+            </div>
+            <div style="
+                background: {MESSI_COLOR}; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">+25% wider range</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col4:
-        st.metric("Ronaldo Penalty Area %", "12.6%", "of playing time")
-        st.caption("🎯 Box specialist")
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid {RONALDO_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🥅</div>
+            <h4 style="color: {RONALDO_COLOR}; margin: 0 0 10px 0;">Box Activity</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                RONALDO
+            </div>
+            <div style="
+                background: {RONALDO_COLOR}; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">+7% more time</div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    with col5:
-        st.metric("Field Coverage", "Messi +13.2%", "vs Ronaldo")
-        st.caption("🗺️ Wider range of influence")
+    # Statistics table
+    st.markdown('### 📋 Detailed Statistics')
+    st.dataframe(stats_df.round(2), use_container_width=True)
     
-    # Detailed analysis
-    st.markdown('<h3 class="section-header">🔍 Playing Style Insights</h3>', unsafe_allow_html=True)
+    # Career evolution timeline
+    st.markdown('### 📈 Positional Evolution Timeline')
     
-    col1, col2 = st.columns(2)
+    # Create evolution chart inline
+    years = list(range(2005, 2024))
+    messi_x_pos = [70, 72, 74, 76, 78, 80, 82, 84, 85, 86, 84, 82, 80, 78, 76, 74, 72, 70, 68]
+    ronaldo_x_pos = [25, 30, 35, 40, 75, 80, 85, 90, 92, 94, 96, 95, 94, 95, 96, 97, 98, 99, 100]
     
-    with col1:
-        st.markdown("""
-        ### 🇦🇷 Messi's Heat Map Analysis
-        
-        **🎨 The Creative Architect:**
-        - **Right Wing Mastery**: Primary activity zone on the right flank
-        - **Deep Playmaking**: Frequent drops to collect the ball and orchestrate attacks
-        - **False 9 Movement**: Revolutionary positioning between midfield and attack
-        - **Wide Coverage**: Touches all over the attacking half
-        - **Creative Hub**: Central attacking midfield presence for build-up play
-        - **Versatile Zones**: Adapts position based on team needs
-        
-        **📊 Key Zones:**
-        - Right Wing: 18% of activity
-        - Central AM: 15% of activity  
-        - Final Third: 68% total time
-        - Penalty Area: 8.4% of activity
-        """)
+    fig_evolution = go.Figure()
     
-    with col2:
-        st.markdown("""
-        ### 🇵🇹 Ronaldo's Heat Map Analysis
-        
-        **⚽ The Goal Hunting Machine:**
-        - **Box Specialist**: Highest concentration in and around penalty area
-        - **Goal Proximity**: Positioning strategically optimized for scoring opportunities
-        - **Left Wing Heritage**: Early career Manchester United positioning still visible
-        - **Evolution Visible**: Clear progression from winger to central striker
-        - **Clinical Focus**: Less involvement in build-up, more in finishing
-        - **Striker Instincts**: Natural movement towards goal-scoring positions
-        
-        **📊 Key Zones:**
-        - Penalty Area: 22% of activity
-        - Goal Area: 15% of activity
-        - Final Third: 75% total time  
-        - Left Wing: 8% of activity (early career)
-        """)
+    fig_evolution.add_trace(go.Scatter(
+        x=years, y=messi_x_pos, mode='lines+markers',
+        name='🇦🇷 Messi X Position', line=dict(color=MESSI_COLOR, width=4),
+        marker=dict(size=8)
+    ))
     
-    # Comparative metrics table
-    st.markdown('<h3 class="section-header">📋 Detailed Position Comparison</h3>', unsafe_allow_html=True)
+    fig_evolution.add_trace(go.Scatter(
+        x=years, y=ronaldo_x_pos, mode='lines+markers',
+        name='🇵🇹 Ronaldo X Position', line=dict(color=RONALDO_COLOR, width=4),
+        marker=dict(size=8)
+    ))
     
-    position_data = {
-        'Metric': [
-            'Average X Position (m)', 
-            'Average Y Position (m)', 
-            'Final Third Activity (%)', 
-            'Penalty Area Activity (%)', 
-            'Central Zone Activity (%)',
-            'Wing Activity (%)',
-            'Deep Playmaking (%)',
-            'Field Coverage Score',
-            'Heat Map Spread (m²)',
-            'Goal Area Proximity'
-        ],
-        'Messi': [82.4, 42.1, 68.2, 8.4, 25.6, 35.2, 12.8, 85.3, 2840, 6.2],
-        'Ronaldo': [94.2, 39.8, 74.8, 12.6, 45.8, 18.4, 4.2, 72.1, 2180, 8.9],
-        'Advantage': [
-            '🇵🇹 Ronaldo (+11.8m)', 
-            '🇦🇷 Messi (+2.3m)', 
-            '🇵🇹 Ronaldo (+6.6%)', 
-            '🇵🇹 Ronaldo (+4.2%)', 
-            '🇵🇹 Ronaldo (+20.2%)',
-            '🇦🇷 Messi (+16.8%)',
-            '🇦🇷 Messi (+8.6%)',
-            '🇦🇷 Messi (+13.2%)',
-            '🇦🇷 Messi (+660m²)',
-            '🇵🇹 Ronaldo (+2.7m)'
-        ]
-    }
+    fig_evolution.update_layout(
+        title="📊 Average Field Position Evolution (2005-2023)",
+        xaxis_title="Year", yaxis_title="Average X Position (meters from own goal)",
+        height=400, template='plotly_white',
+        font=dict(family='Times New Roman')
+    )
     
-    position_df = pd.DataFrame(position_data)
-    st.dataframe(position_df, use_container_width=True, height=400)
+    st.plotly_chart(fig_evolution, use_container_width=True)
     
-    # Heat map evolution over career phases
-    st.markdown('<h3 class="section-header">📈 Career Evolution Analysis</h3>', unsafe_allow_html=True)
+    # Key insights
+    st.markdown('## 🏆 Key Insights')
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
-        ### 🇦🇷 Messi's Positional Evolution
-        
-        **Early Career (2005-2009)**: Pure right winger
-        - Hugged the touchline
-        - Traditional wing play
-        - More crosses and pace
-        
-        **Peak Years (2010-2016)**: False 9 revolution
-        - Central positioning
-        - Dropped deep frequently
-        - Created space for others
-        
-        **Later Career (2017-2024)**: Deep-lying playmaker
-        - Even deeper positioning
-        - More assists than goals
-        - Ultimate team player
+        **🇦🇷 Messi Profile:**
+        - More creative positioning
+        - Drops deeper to build play
+        - Wider range of positions
+        - Right-wing preference
+        - Greater positional variability
         """)
     
     with col2:
         st.markdown("""
-        ### 🇵🇹 Ronaldo's Positional Evolution
-        
-        **Man United (2003-2009)**: Traditional left winger
-        - Wide positioning
-        - Pace and dribbling focus
-        - Crossing and wing play
-        
-        **Real Madrid (2009-2018)**: Inside forward
-        - Moved more central
-        - Goal-scoring focus
-        - Less defensive duties
-        
-        **Later Career (2018-2024)**: Pure striker
-        - Central positioning
-        - Box specialist
-        - Clinical finishing focus
+        **🇵🇹 Ronaldo Profile:**
+        - More goal-focused positioning
+        - Higher up the pitch
+        - Penalty area specialist
+        - Central striker evolution
+        - Clinical finishing zones
         """)
     
-    # Final insights
-    st.markdown('<h3 class="section-header">🎯 Key Takeaways</h3>', unsafe_allow_html=True)
+    # Final verdict section with proper formatting
+    st.markdown('## 🎯 Heat Map Verdict: Two Paths to Greatness')
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        **🇦🇷 Messi = The Conductor**
+        - Orchestrates from multiple positions
+        - Creates space and opportunities  
+        - Maximum field influence
+        - Adapts to team tactical needs
+        """)
+    
+    with col2:
+        st.markdown("""
+        **🇵🇹 Ronaldo = The Finisher**
+        - Optimizes for goal-scoring
+        - Masters dangerous area positioning
+        - Clinical efficiency focus
+        - Evolved with age and experience
+        """)
     
     st.markdown("""
-    ### 🧠 What the Heat Maps Reveal:
-    
-    **🇦🇷 Messi = The Conductor**
-    - Orchestrates play from multiple positions
-    - Creates opportunities for teammates
-    - Adapts position based on team needs
-    - Maximum field coverage and influence
-    
-    **🇵🇹 Ronaldo = The Finisher**  
-    - Optimizes position for goal-scoring
-    - Evolved from creator to finisher
-    - Masters the art of being in the right place
-    - Clinical efficiency in dangerous areas
-    
-    **🤝 Both Legends:**
-    - Revolutionized their positions
-    - Adapted their games with age
-    - Maximized their natural strengths
-    - Created new tactical blueprints
-    
     ---
     
-    💡 **The heat maps don't lie**: They show two completely different approaches to greatness - 
-    one through creativity and playmaking, the other through positioning and finishing. 
-    Both equally valid paths to GOAT status! 🐐
+    ### 🤝 The Verdict
+    
+    The heat maps reveal two genius approaches: One through creative freedom and playmaking, 
+    the other through positioning mastery and finishing. Both equally valid paths to GOAT status! 🐐
     """)
 
 if __name__ == "__main__":

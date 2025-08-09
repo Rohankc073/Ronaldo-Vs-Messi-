@@ -3,20 +3,36 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 import pandas as pd
-from utils.data_loader import load_all_data
+import numpy as np
 
 def show():
-    """Display the season-by-season performance analysis page"""
-    st.markdown('<h1 class="section-header">📅 SEASON-BY-SEASON PERFORMANCE</h1>', unsafe_allow_html=True)
-    
-    # Page introduction
+    """Display season-by-season performance analysis with clutch design theme"""
+    # Custom CSS for Times New Roman font
     st.markdown("""
-    **Track the incredible journey season by season.** From their breakthrough years to record-breaking campaigns, 
-    witness how Messi and Ronaldo evolved, peaked, and maintained excellence across two decades. Every season tells 
-    a story of growth, adaptation, and relentless pursuit of greatness.
-    """)
+    <style>
+    .main {
+        font-family: 'Times New Roman', serif;
+    }
+    .section-header {
+        font-family: 'Times New Roman', serif;
+        font-weight: bold;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
-    # Create comprehensive season data (Complete careers 2003-2024)
+    st.set_page_config(page_title="Season Performance", layout="wide")
+    
+    # Argentina Blue: #75AADB, Portugal Red: #FF2D2D
+    MESSI_COLOR = '#75AADB'
+    RONALDO_COLOR = '#FF2D2D'
+    
+    st.markdown(f"""
+    <h1 style="text-align: center; color: {RONALDO_COLOR}; font-family: 'Times New Roman', serif;">
+    📅 SEASON-BY-SEASON PERFORMANCE ANALYSIS
+    </h1>
+    """, unsafe_allow_html=True)
+    
+    # Create comprehensive season data
     seasons_data = {
         'Season': ['2003-04', '2004-05', '2005-06', '2006-07', '2007-08', '2008-09', '2009-10', '2010-11', '2011-12', 
                   '2012-13', '2013-14', '2014-15', '2015-16', '2016-17', '2017-18', '2018-19', '2019-20', '2020-21', 
@@ -41,349 +57,586 @@ def show():
     
     seasons_df = pd.DataFrame(seasons_data)
     
-    # Debug section - Show data verification
-    with st.expander("🔍 Data Verification (Click to expand)", expanded=False):
-        st.write(f"**Total seasons in dataset:** {len(seasons_df)}")
-        st.write(f"**First season:** {seasons_df['Season'].iloc[0]}")
-        st.write(f"**Last season:** {seasons_df['Season'].iloc[-1]}")
-        st.write(f"**Messi's last season goals:** {seasons_df['Messi_Goals'].iloc[-1]} (2023-24)")
-        st.write(f"**Ronaldo's last season goals:** {seasons_df['Ronaldo_Goals'].iloc[-1]} (2023-24)")
-        
-        # Show last 5 seasons
-        st.write("**Last 5 seasons data:**")
-        st.dataframe(seasons_df[['Season', 'Messi_Goals', 'Ronaldo_Goals', 'Messi_Club', 'Ronaldo_Club']].tail())
+    # Quick stats cards with custom design
+    st.markdown("## 📊 Career Overview")
     
-    # Season selector
-    st.markdown('<h3 class="section-header">🎯 Season Selector & Overview</h3>', unsafe_allow_html=True)
+    # Custom metrics cards
+    col1, col2, col3, col4, col5 = st.columns(5)
     
-    col1, col2, col3 = st.columns([1, 2, 1])
+    with col1:
+        messi_peak = seasons_df['Messi_Goals'].max()
+        ronaldo_peak = seasons_df['Ronaldo_Goals'].max()
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid {MESSI_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">⚽</div>
+            <h5 style="color: {MESSI_COLOR}; margin: 0 0 8px 0;">Peak Season</h5>
+            <div style="font-size: 1.5rem; font-weight: 900; color: #FFD700; margin: 8px 0;">
+                73 vs 61
+            </div>
+            <div style="
+                background: {MESSI_COLOR}; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 20px; 
+                font-weight: bold;
+                font-size: 0.8rem;
+            ">Messi +12</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        selected_season = st.selectbox(
-            "Select a season to analyze in detail:",
-            seasons_df['Season'].tolist(),
-            index=8  # Default to 2011-12 (Messi's record season)
-        )
+        messi_total = seasons_df['Messi_Goals'].sum()
+        ronaldo_total = seasons_df['Ronaldo_Goals'].sum()
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid {RONALDO_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🎯</div>
+            <h5 style="color: {RONALDO_COLOR}; margin: 0 0 8px 0;">Total Goals</h5>
+            <div style="font-size: 1.5rem; font-weight: 900; color: #FFD700; margin: 8px 0;">
+                {messi_total} vs {ronaldo_total}
+            </div>
+            <div style="
+                background: {RONALDO_COLOR}; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 20px; 
+                font-weight: bold;
+                font-size: 0.8rem;
+            ">Ronaldo +{ronaldo_total-messi_total}</div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    # Selected season analysis
+    with col3:
+        messi_assists = seasons_df['Messi_Assists'].sum()
+        ronaldo_assists = seasons_df['Ronaldo_Assists'].sum()
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid {MESSI_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🅰️</div>
+            <h5 style="color: {MESSI_COLOR}; margin: 0 0 8px 0;">Total Assists</h5>
+            <div style="font-size: 1.5rem; font-weight: 900; color: #FFD700; margin: 8px 0;">
+                {messi_assists} vs {ronaldo_assists}
+            </div>
+            <div style="
+                background: {MESSI_COLOR}; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 20px; 
+                font-weight: bold;
+                font-size: 0.8rem;
+            ">Messi +{messi_assists-ronaldo_assists}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        messi_seasons = len(seasons_df)
+        ronaldo_seasons = len(seasons_df)
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #FFD700;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">📅</div>
+            <h5 style="color: #FFD700; margin: 0 0 8px 0;">Seasons</h5>
+            <div style="font-size: 1.5rem; font-weight: 900; color: #FFD700; margin: 8px 0;">
+                21 vs 21
+            </div>
+            <div style="
+                background: #FFD700; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 20px; 
+                font-weight: bold;
+                font-size: 0.8rem;
+            ">Equal</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col5:
+        messi_trophies = seasons_df['Messi_Trophies'].sum()
+        ronaldo_trophies = seasons_df['Ronaldo_Trophies'].sum()
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid {MESSI_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🏆</div>
+            <h5 style="color: {MESSI_COLOR}; margin: 0 0 8px 0;">Trophies</h5>
+            <div style="font-size: 1.5rem; font-weight: 900; color: #FFD700; margin: 8px 0;">
+                {messi_trophies} vs {ronaldo_trophies}
+            </div>
+            <div style="
+                background: {MESSI_COLOR}; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 20px; 
+                font-weight: bold;
+                font-size: 0.8rem;
+            ">Messi +{messi_trophies-ronaldo_trophies}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Interactive Season Selector
+    st.markdown('## 🎯 Season Explorer')
+    
+    selected_season = st.selectbox(
+        "Select a season for detailed analysis:",
+        seasons_df['Season'].tolist(),
+        index=8  # Default to 2011-12 (Messi's record season)
+    )
+    
+    # Selected Season Dashboard
     if selected_season:
         season_row = seasons_df[seasons_df['Season'] == selected_season].iloc[0]
         
-        st.markdown(f'<h3 class="section-header">🔍 {selected_season} Season Deep Dive</h3>', unsafe_allow_html=True)
+        st.markdown(f'### 🔍 {selected_season} Season Dashboard')
         
-        col1, col2 = st.columns(2)
+        # Season comparison cards
+        col1, col2, col3 = st.columns(3)
         
         with col1:
             st.markdown(f"""
-            <div class="player-card messi-card">
-                <h3>🇦🇷 MESSI {selected_season}</h3>
-                <h4>📊 Season Statistics</h4>
-                <p><strong>Age:</strong> {season_row['Messi_Age']} years old</p>
-                <p><strong>Club:</strong> {season_row['Messi_Club']}</p>
-                <p><strong>Goals:</strong> {season_row['Messi_Goals']}</p>
-                <p><strong>Assists:</strong> {season_row['Messi_Assists']}</p>
-                <p><strong>Appearances:</strong> {season_row['Messi_Apps']}</p>
-                <p><strong>Goals per Game:</strong> {season_row['Messi_Goals']/season_row['Messi_Apps']:.2f}</p>
-                <p><strong>Goal Contributions:</strong> {season_row['Messi_Goals'] + season_row['Messi_Assists']}</p>
-                <p><strong>Trophies Won:</strong> {season_row['Messi_Trophies']}</p>
+            <div style="
+                background: linear-gradient(135deg, {MESSI_COLOR} 0%, #5a9bd4 100%);
+                color: white;
+                padding: 2rem;
+                border-radius: 15px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                text-align: center;
+                font-family: 'Times New Roman', serif;
+            ">
+                <h3 style="margin: 0;">🇦🇷 MESSI ({season_row['Messi_Age']} years old)</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0;">
+                    <div><strong style="font-size: 2rem;">{season_row['Messi_Goals']}</strong><br><small>Goals</small></div>
+                    <div><strong style="font-size: 2rem;">{season_row['Messi_Assists']}</strong><br><small>Assists</small></div>
+                    <div><strong style="font-size: 2rem;">{season_row['Messi_Apps']}</strong><br><small>Games</small></div>
+                    <div><strong style="font-size: 2rem;">{season_row['Messi_Trophies']}</strong><br><small>Trophies</small></div>
+                </div>
+                <p style="margin: 0; opacity: 0.9; font-style: italic;">Club: {season_row['Messi_Club']}</p>
             </div>
             """, unsafe_allow_html=True)
         
         with col2:
+            messi_gpg = season_row['Messi_Goals']/season_row['Messi_Apps']
+            ronaldo_gpg = season_row['Ronaldo_Goals']/season_row['Ronaldo_Apps']
+            messi_contrib = season_row['Messi_Goals'] + season_row['Messi_Assists']
+            ronaldo_contrib = season_row['Ronaldo_Goals'] + season_row['Ronaldo_Assists']
+            
             st.markdown(f"""
-            <div class="player-card ronaldo-card">
-                <h3>🇵🇹 RONALDO {selected_season}</h3>
-                <h4>📊 Season Statistics</h4>
-                <p><strong>Age:</strong> {season_row['Ronaldo_Age']} years old</p>
-                <p><strong>Club:</strong> {season_row['Ronaldo_Club']}</p>
-                <p><strong>Goals:</strong> {season_row['Ronaldo_Goals']}</p>
-                <p><strong>Assists:</strong> {season_row['Ronaldo_Assists']}</p>
-                <p><strong>Appearances:</strong> {season_row['Ronaldo_Apps']}</p>
-                <p><strong>Goals per Game:</strong> {season_row['Ronaldo_Goals']/season_row['Ronaldo_Apps']:.2f}</p>
-                <p><strong>Goal Contributions:</strong> {season_row['Ronaldo_Goals'] + season_row['Ronaldo_Assists']}</p>
-                <p><strong>Trophies Won:</strong> {season_row['Ronaldo_Trophies']}</p>
+            <div style="
+                background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                padding: 25px;
+                text-align: center;
+                border: 2px solid #FFD700;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                font-family: 'Times New Roman', serif;
+                margin: 10px 0;
+            ">
+                <h3 style="color: #FFD700; margin: 0 0 20px 0;">⚖️ HEAD-TO-HEAD</h3>
+                <div style="margin: 15px 0;">
+                    <div style="font-size: 1.1rem; margin: 10px 0;"><strong>Goals per Game:</strong></div>
+                    <div style="font-size: 1.5rem; color: #FFD700;">{messi_gpg:.2f} vs {ronaldo_gpg:.2f}</div>
+                </div>
+                <div style="margin: 15px 0;">
+                    <div style="font-size: 1.1rem; margin: 10px 0;"><strong>Total Contributions:</strong></div>
+                    <div style="font-size: 1.5rem; color: #FFD700;">{messi_contrib} vs {ronaldo_contrib}</div>
+                </div>
+                <div style="margin: 15px 0;">
+                    <div style="font-size: 1.1rem; margin: 10px 0;"><strong>Trophies:</strong></div>
+                    <div style="font-size: 1.5rem; color: #FFD700;">{season_row['Messi_Trophies']} vs {season_row['Ronaldo_Trophies']}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(135deg, {RONALDO_COLOR} 0%, #e02525 100%);
+                color: white;
+                padding: 2rem;
+                border-radius: 15px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                text-align: center;
+                font-family: 'Times New Roman', serif;
+            ">
+                <h3 style="margin: 0;">🇵🇹 RONALDO ({season_row['Ronaldo_Age']} years old)</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0;">
+                    <div><strong style="font-size: 2rem;">{season_row['Ronaldo_Goals']}</strong><br><small>Goals</small></div>
+                    <div><strong style="font-size: 2rem;">{season_row['Ronaldo_Assists']}</strong><br><small>Assists</small></div>
+                    <div><strong style="font-size: 2rem;">{season_row['Ronaldo_Apps']}</strong><br><small>Games</small></div>
+                    <div><strong style="font-size: 2rem;">{season_row['Ronaldo_Trophies']}</strong><br><small>Trophies</small></div>
+                </div>
+                <p style="margin: 0; opacity: 0.9; font-style: italic;">Club: {season_row['Ronaldo_Club']}</p>
             </div>
             """, unsafe_allow_html=True)
     
-    # Career timeline visualization
-    st.markdown('<h3 class="section-header">📈 Complete Career Timeline</h3>', unsafe_allow_html=True)
-    
-    fig = go.Figure()
-    
-    # Goals timeline - Make sure we have all 21 seasons
-    fig.add_trace(go.Scatter(
-        x=seasons_df['Season'],
-        y=seasons_df['Messi_Goals'],
-        mode='lines+markers',
-        name='Messi Goals',
-        line=dict(color='#4ECDC4', width=3),
-        marker=dict(size=8),
-        hovertemplate='<b>Messi %{x}</b><br>Goals: %{y}<br>Age: %{customdata}<br>Club: %{text}<extra></extra>',
-        customdata=seasons_df['Messi_Age'],
-        text=seasons_df['Messi_Club']
-    ))
-    
-    fig.add_trace(go.Scatter(
-        x=seasons_df['Season'],
-        y=seasons_df['Ronaldo_Goals'],
-        mode='lines+markers',
-        name='Ronaldo Goals',
-        line=dict(color='#FF6B6B', width=3),
-        marker=dict(size=8),
-        hovertemplate='<b>Ronaldo %{x}</b><br>Goals: %{y}<br>Age: %{customdata}<br>Club: %{text}<extra></extra>',
-        customdata=seasons_df['Ronaldo_Age'],
-        text=seasons_df['Ronaldo_Club']
-    ))
-    
-    # Add major milestones with correct season references
-    fig.add_annotation(x='2011-12', y=73, text="Messi's Record<br>73 Goals", arrowcolor="#4ECDC4", arrowwidth=2)
-    fig.add_annotation(x='2013-14', y=61, text="Ronaldo's Peak<br>61 Goals", arrowcolor="#FF6B6B", arrowwidth=2)
-    fig.add_annotation(x='2008-09', y=38, text="Messi's<br>Breakthrough", arrowcolor="#4ECDC4", arrowwidth=2)
-    fig.add_annotation(x='2007-08', y=42, text="Ronaldo's<br>Breakout", arrowcolor="#FF6B6B", arrowwidth=2)
-    fig.add_annotation(x='2021-22', y=11, text="Messi to PSG", arrowcolor="#4ECDC4", arrowwidth=1)
-    fig.add_annotation(x='2023-24', y=25, text="Messi to Miami", arrowcolor="#4ECDC4", arrowwidth=1)
-    fig.add_annotation(x='2018-19', y=44, text="Ronaldo to Juventus", arrowcolor="#FF6B6B", arrowwidth=1)
-    fig.add_annotation(x='2023-24', y=35, text="Ronaldo to Al Nassr", arrowcolor="#FF6B6B", arrowwidth=1)
-    
-    fig.update_layout(
-        title="⚽ Goals per Season Timeline (2003-2024)",
-        xaxis_title="Season",
-        yaxis_title="Goals Scored",
-        height=500,
-        template='plotly_white',
-        xaxis_tickangle=-45,
-        showlegend=True,
-        # Ensure x-axis shows all seasons
-        xaxis=dict(
-            type='category',  # Treat as categorical data
-            categoryorder='array',
-            categoryarray=seasons_df['Season'].tolist()  # Explicit order
-        )
-    )
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Quick verification - show recent seasons data
-    st.markdown("**Recent Seasons Data (Last 5 years):**")
-    recent_data = seasons_df[['Season', 'Messi_Goals', 'Ronaldo_Goals', 'Messi_Club', 'Ronaldo_Club']].tail()
-    st.dataframe(recent_data, use_container_width=True)
-    
-    # Peak seasons analysis
-    st.markdown('<h3 class="section-header">🏔️ Peak Seasons Analysis</h3>', unsafe_allow_html=True)
+    # Career Timeline
+    st.markdown('## 📈 Complete Career Timeline')
     
     col1, col2 = st.columns(2)
     
     with col1:
-        # Messi's top 5 seasons
-        messi_peak = seasons_df.nlargest(5, 'Messi_Goals')[['Season', 'Messi_Age', 'Messi_Goals', 'Messi_Assists', 'Messi_Trophies']]
-        
-        st.markdown("### 🇦🇷 Messi's Top 5 Goal-Scoring Seasons:")
-        
-        for idx, row in messi_peak.iterrows():
-            total_contrib = row['Messi_Goals'] + row['Messi_Assists']
-            st.markdown(f"""
-            **{row['Season']} (Age {row['Messi_Age']})**
-            - Goals: {row['Messi_Goals']} | Assists: {row['Messi_Assists']} 
-            - Total Contributions: {total_contrib}
-            - Trophies: {row['Messi_Trophies']}
-            """)
-        
-        # Peak season details
-        st.markdown("""
-        **🎯 Peak Analysis:**
-        - **Best Season**: 2011-12 (73 goals + 29 assists = 102 contributions)
-        - **Most Consistent**: 2015-16 (54 goals + 23 assists)
-        - **Trophy Years**: 2008-09 (6 trophies), 2015-16 (2 trophies)
-        """)
-    
-    with col2:
-        # Ronaldo's top 5 seasons
-        ronaldo_peak = seasons_df.nlargest(5, 'Ronaldo_Goals')[['Season', 'Ronaldo_Age', 'Ronaldo_Goals', 'Ronaldo_Assists', 'Ronaldo_Trophies']]
-        
-        st.markdown("### 🇵🇹 Ronaldo's Top 5 Goal-Scoring Seasons:")
-        
-        for idx, row in ronaldo_peak.iterrows():
-            total_contrib = row['Ronaldo_Goals'] + row['Ronaldo_Assists']
-            st.markdown(f"""
-            **{row['Season']} (Age {row['Ronaldo_Age']})**
-            - Goals: {row['Ronaldo_Goals']} | Assists: {row['Ronaldo_Assists']}
-            - Total Contributions: {total_contrib}
-            - Trophies: {row['Ronaldo_Trophies']}
-            """)
-        
-        # Peak season details
-        st.markdown("""
-        **🎯 Peak Analysis:**
-        - **Best Season**: 2013-14 (61 goals + 22 assists = 83 contributions)
-        - **Most Balanced**: 2010-11 (60 goals + 15 assists)
-        - **Trophy Years**: 2013-14 (4 trophies), 2016-17 (2 trophies)
-        """)
-    
-    # Age-based performance analysis
-    st.markdown('<h3 class="section-header">⏰ Performance by Age Analysis</h3>', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # Goals by age scatter plot
+        # Goals timeline
         fig = go.Figure()
         fig.add_trace(go.Scatter(
-            x=seasons_df['Messi_Age'],
+            x=seasons_df['Season'],
             y=seasons_df['Messi_Goals'],
-            mode='markers+lines',
+            mode='lines+markers',
             name='Messi',
-            marker=dict(size=10, color='#4ECDC4'),
-            line=dict(color='#4ECDC4', width=2)
+            line=dict(color=MESSI_COLOR, width=4),
+            marker=dict(size=10),
+            fill='tonexty'
         ))
         fig.add_trace(go.Scatter(
-            x=seasons_df['Ronaldo_Age'],
+            x=seasons_df['Season'],
             y=seasons_df['Ronaldo_Goals'],
-            mode='markers+lines',
+            mode='lines+markers',
             name='Ronaldo',
-            marker=dict(size=10, color='#FF6B6B'),
-            line=dict(color='#FF6B6B', width=2)
+            line=dict(color=RONALDO_COLOR, width=4),
+            marker=dict(size=10),
+            fill='tozeroy'
         ))
         
         fig.update_layout(
-            title="⚽ Goals by Age",
-            xaxis_title="Age",
-            yaxis_title="Goals per Season",
+            title="⚽ Goals per Season Timeline",
+            xaxis_title="Season",
+            yaxis_title="Goals",
             height=400,
-            template='plotly_white'
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        fig.update_xaxes(tickangle=-45)
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        # Assists timeline
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=seasons_df['Season'],
+            y=seasons_df['Messi_Assists'],
+            mode='lines+markers',
+            name='Messi',
+            line=dict(color=MESSI_COLOR, width=4),
+            marker=dict(size=10)
+        ))
+        fig.add_trace(go.Scatter(
+            x=seasons_df['Season'],
+            y=seasons_df['Ronaldo_Assists'],
+            mode='lines+markers',
+            name='Ronaldo',
+            line=dict(color=RONALDO_COLOR, width=4),
+            marker=dict(size=10)
+        ))
+        
+        fig.update_layout(
+            title="🎯 Assists per Season Timeline",
+            xaxis_title="Season",
+            yaxis_title="Assists",
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        fig.update_xaxes(tickangle=-45)
+        st.plotly_chart(fig, use_container_width=True)
+    
+    # Peak Seasons Analysis
+    st.markdown('## 🔥 Peak Seasons Heatmap')
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Messi performance matrix
+        performance_metrics = ['Goals', 'Assists', 'G+A', 'Goals/Game', 'Trophies']
+        messi_matrix = [
+            seasons_df['Messi_Goals'].tolist(),
+            seasons_df['Messi_Assists'].tolist(),
+            (seasons_df['Messi_Goals'] + seasons_df['Messi_Assists']).tolist(),
+            (seasons_df['Messi_Goals'] / seasons_df['Messi_Apps']).tolist(),
+            seasons_df['Messi_Trophies'].tolist()
+        ]
+        
+        fig = go.Figure(data=go.Heatmap(
+            z=messi_matrix,
+            x=seasons_df['Season'],
+            y=performance_metrics,
+            colorscale='Blues',
+            hoverongaps=False
+        ))
+        fig.update_layout(
+            title="🇦🇷 Messi Performance Heatmap",
+            height=400,
+            xaxis_tickangle=-45,
+            font=dict(family='Times New Roman')
         )
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        # Age performance insights
-        st.markdown("""
-        ### 📊 Age-Based Insights:
+        # Ronaldo performance matrix
+        ronaldo_matrix = [
+            seasons_df['Ronaldo_Goals'].tolist(),
+            seasons_df['Ronaldo_Assists'].tolist(),
+            (seasons_df['Ronaldo_Goals'] + seasons_df['Ronaldo_Assists']).tolist(),
+            (seasons_df['Ronaldo_Goals'] / seasons_df['Ronaldo_Apps']).tolist(),
+            seasons_df['Ronaldo_Trophies'].tolist()
+        ]
         
-        **🇦🇷 Messi's Age Progression:**
-        - **Peak Years**: 24-25 (73 and 60 goals)
-        - **Consistency**: 27-31 (50+ goals regularly)
-        - **Late Career**: 35+ (20+ goals in different league)
-        - **Longevity**: High performance across 20 years
-        
-        **🇵🇹 Ronaldo's Age Progression:**
-        - **Early Peak**: 22 (42 goals breakthrough)
-        - **Prime Years**: 28-29 (61 and 48 goals)
-        - **Consistency**: 24-33 (40+ goals for 10 years)
-        - **Late Career**: 38+ (35+ goals in Saudi Arabia)
-        
-        **🔍 Key Differences:**
-        - Messi: Higher peak but earlier decline
-        - Ronaldo: More consistent across ages
-        - Both: Remarkable longevity at top level
-        """)
-    
-    # Assists and playmaking evolution
-    st.markdown('<h3 class="section-header">🎨 Assists & Playmaking Evolution</h3>', unsafe_allow_html=True)
-    
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=seasons_df['Season'],
-        y=seasons_df['Messi_Assists'],
-        mode='lines+markers',
-        name='Messi Assists',
-        line=dict(color='#45B7D1', width=3),
-        marker=dict(size=8),
-        hovertemplate='<b>Messi %{x}</b><br>Assists: %{y}<br>Club: %{text}<extra></extra>',
-        text=seasons_df['Messi_Club']
-    ))
-    fig.add_trace(go.Scatter(
-        x=seasons_df['Season'],
-        y=seasons_df['Ronaldo_Assists'],
-        mode='lines+markers',
-        name='Ronaldo Assists',
-        line=dict(color='#FFA07A', width=3),
-        marker=dict(size=8),
-        hovertemplate='<b>Ronaldo %{x}</b><br>Assists: %{y}<br>Club: %{text}<extra></extra>',
-        text=seasons_df['Ronaldo_Club']
-    ))
-    
-    # Add annotations for playmaking peaks
-    fig.add_annotation(x='2011-12', y=29, text="Messi's Assist Peak<br>29 Assists", arrowcolor="#45B7D1", arrowwidth=2)
-    fig.add_annotation(x='2013-14', y=22, text="Ronaldo's Assist Peak<br>22 Assists", arrowcolor="#FFA07A", arrowwidth=2)
-    fig.add_annotation(x='2022-23', y=20, text="Messi PSG<br>Playmaker", arrowcolor="#45B7D1", arrowwidth=1)
-    
-    fig.update_layout(
-        title="🎯 Assists per Season Timeline (2003-2024)",
-        xaxis_title="Season",
-        yaxis_title="Assists",
-        height=400,
-        template='plotly_white',
-        xaxis_tickangle=-45,
-        xaxis=dict(
-            type='category',
-            categoryorder='array',
-            categoryarray=seasons_df['Season'].tolist()
+        fig = go.Figure(data=go.Heatmap(
+            z=ronaldo_matrix,
+            x=seasons_df['Season'],
+            y=performance_metrics,
+            colorscale='Reds',
+            hoverongaps=False
+        ))
+        fig.update_layout(
+            title="🇵🇹 Ronaldo Performance Heatmap",
+            height=400,
+            xaxis_tickangle=-45,
+            font=dict(family='Times New Roman')
         )
-    )
-    st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
     
-    # Career phases analysis
-    st.markdown('<h3 class="section-header">📊 Career Phases Breakdown</h3>', unsafe_allow_html=True)
+    # Age Performance Analysis
+    st.markdown('## ⏰ Performance by Age')
     
-    # Define career phases
-    early_career = seasons_df[(seasons_df['Messi_Age'] >= 16) & (seasons_df['Messi_Age'] <= 21)]
-    peak_career = seasons_df[(seasons_df['Messi_Age'] >= 22) & (seasons_df['Messi_Age'] <= 30)]
-    late_career = seasons_df[seasons_df['Messi_Age'] >= 31]
+    col1, col2 = st.columns(2)
     
-    phases_analysis = {
-        'Phase': ['Early Career (16-21)', 'Peak Career (22-30)', 'Late Career (31+)'],
-        'Messi Avg Goals': [
+    with col1:
+        # Goals by age bubble chart
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=seasons_df['Messi_Age'],
+            y=seasons_df['Messi_Goals'],
+            mode='markers',
+            marker=dict(
+                size=seasons_df['Messi_Assists']*2,
+                sizemode='diameter',
+                sizeref=2,
+                color=MESSI_COLOR,
+                opacity=0.7,
+                line=dict(width=2, color='white')
+            ),
+            name='Messi',
+            text=seasons_df['Season'],
+            hovertemplate='<b>%{text}</b><br>Age: %{x}<br>Goals: %{y}<br>Assists: %{marker.size}<extra></extra>'
+        ))
+        fig.add_trace(go.Scatter(
+            x=seasons_df['Ronaldo_Age'],
+            y=seasons_df['Ronaldo_Goals'],
+            mode='markers',
+            marker=dict(
+                size=seasons_df['Ronaldo_Assists']*2,
+                sizemode='diameter',
+                sizeref=2,
+                color=RONALDO_COLOR,
+                opacity=0.7,
+                line=dict(width=2, color='white')
+            ),
+            name='Ronaldo',
+            text=seasons_df['Season'],
+            hovertemplate='<b>%{text}</b><br>Age: %{x}<br>Goals: %{y}<br>Assists: %{marker.size}<extra></extra>'
+        ))
+        fig.update_layout(
+            title="⚽ Goals by Age (Bubble size = Assists)",
+            xaxis_title="Age",
+            yaxis_title="Goals",
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        # Career phases performance
+        early_career = seasons_df[(seasons_df['Messi_Age'] >= 16) & (seasons_df['Messi_Age'] <= 21)]
+        peak_career = seasons_df[(seasons_df['Messi_Age'] >= 22) & (seasons_df['Messi_Age'] <= 30)]
+        late_career = seasons_df[seasons_df['Messi_Age'] >= 31]
+        
+        phases = ['Early (16-21)', 'Peak (22-30)', 'Late (31+)']
+        messi_avg_goals = [
             early_career['Messi_Goals'].mean(),
             peak_career['Messi_Goals'].mean(),
             late_career['Messi_Goals'].mean()
-        ],
-        'Ronaldo Avg Goals': [
+        ]
+        ronaldo_avg_goals = [
             early_career['Ronaldo_Goals'].mean(),
             peak_career['Ronaldo_Goals'].mean(),
             late_career['Ronaldo_Goals'].mean()
-        ],
-        'Messi Avg Assists': [
-            early_career['Messi_Assists'].mean(),
-            peak_career['Messi_Assists'].mean(),
-            late_career['Messi_Assists'].mean()
-        ],
-        'Ronaldo Avg Assists': [
-            early_career['Ronaldo_Assists'].mean(),
-            peak_career['Ronaldo_Assists'].mean(),
-            late_career['Ronaldo_Assists'].mean()
         ]
-    }
+        
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            name='Messi',
+            x=phases,
+            y=messi_avg_goals,
+            marker_color=MESSI_COLOR,
+            text=[f"{x:.1f}" for x in messi_avg_goals],
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        fig.add_trace(go.Bar(
+            name='Ronaldo',
+            x=phases,
+            y=ronaldo_avg_goals,
+            marker_color=RONALDO_COLOR,
+            text=[f"{x:.1f}" for x in ronaldo_avg_goals],
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        fig.update_layout(
+            title="📊 Average Goals by Career Phase",
+            yaxis_title="Average Goals",
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
-    phases_df = pd.DataFrame(phases_analysis)
+    # Top 5 Seasons Comparison
+    st.markdown('## 🏔️ Top 5 Seasons')
     
-    fig = make_subplots(
-        rows=1, cols=2,
-        subplot_titles=('⚽ Average Goals by Career Phase', '🎯 Average Assists by Career Phase')
-    )
+    col1, col2 = st.columns(2)
     
-    # Goals by phase
-    fig.add_trace(
-        go.Bar(x=phases_df['Phase'], y=phases_df['Messi Avg Goals'], name='Messi Goals', marker_color='#4ECDC4'),
-        row=1, col=1
-    )
-    fig.add_trace(
-        go.Bar(x=phases_df['Phase'], y=phases_df['Ronaldo Avg Goals'], name='Ronaldo Goals', marker_color='#FF6B6B'),
-        row=1, col=1
-    )
+    with col1:
+        messi_top5 = seasons_df.nlargest(5, 'Messi_Goals')[['Season', 'Messi_Goals', 'Messi_Assists', 'Messi_Age']]
+        
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            name='Goals',
+            x=messi_top5['Season'],
+            y=messi_top5['Messi_Goals'],
+            marker_color=MESSI_COLOR,
+            text=messi_top5['Messi_Goals'],
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        fig.add_trace(go.Bar(
+            name='Assists',
+            x=messi_top5['Season'],
+            y=messi_top5['Messi_Assists'],
+            marker_color='#45B7D1',
+            text=messi_top5['Messi_Assists'],
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        fig.update_layout(
+            title="🇦🇷 Messi's Top 5 Goal Seasons",
+            barmode='stack',
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
-    # Assists by phase
-    fig.add_trace(
-        go.Bar(x=phases_df['Phase'], y=phases_df['Messi Avg Assists'], name='Messi Assists', marker_color='#45B7D1', showlegend=False),
-        row=1, col=2
-    )
-    fig.add_trace(
-        go.Bar(x=phases_df['Phase'], y=phases_df['Ronaldo Avg Assists'], name='Ronaldo Assists', marker_color='#FFA07A', showlegend=False),
-        row=1, col=2
-    )
+    with col2:
+        ronaldo_top5 = seasons_df.nlargest(5, 'Ronaldo_Goals')[['Season', 'Ronaldo_Goals', 'Ronaldo_Assists', 'Ronaldo_Age']]
+        
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            name='Goals',
+            x=ronaldo_top5['Season'],
+            y=ronaldo_top5['Ronaldo_Goals'],
+            marker_color=RONALDO_COLOR,
+            text=ronaldo_top5['Ronaldo_Goals'],
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        fig.add_trace(go.Bar(
+            name='Assists',
+            x=ronaldo_top5['Season'],
+            y=ronaldo_top5['Ronaldo_Assists'],
+            marker_color='#FFA07A',
+            text=ronaldo_top5['Ronaldo_Assists'],
+            textposition='auto',
+            textfont=dict(family='Times New Roman')
+        ))
+        fig.update_layout(
+            title="🇵🇹 Ronaldo's Top 5 Goal Seasons",
+            barmode='stack',
+            height=400,
+            template='plotly_white',
+            font=dict(family='Times New Roman')
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
-    fig.update_layout(height=400, title_text="📊 Career Phases Performance Analysis")
+    # Trophy Timeline
+    st.markdown('## 🏆 Trophy Timeline')
+    
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        name='Messi Trophies',
+        x=seasons_df['Season'],
+        y=seasons_df['Messi_Trophies'],
+        marker_color=MESSI_COLOR,
+        text=seasons_df['Messi_Trophies'],
+        textposition='auto',
+        textfont=dict(family='Times New Roman')
+    ))
+    fig.add_trace(go.Bar(
+        name='Ronaldo Trophies',
+        x=seasons_df['Season'],
+        y=seasons_df['Ronaldo_Trophies'],
+        marker_color=RONALDO_COLOR,
+        text=seasons_df['Ronaldo_Trophies'],
+        textposition='auto',
+        textfont=dict(family='Times New Roman')
+    ))
+    
+    fig.update_layout(
+        title="🏅 Trophies Won per Season",
+        barmode='group',
+        height=400,
+        template='plotly_white',
+        xaxis_tickangle=-45,
+        font=dict(family='Times New Roman')
+    )
     st.plotly_chart(fig, use_container_width=True)
     
-    # Season statistics table
-    st.markdown('<h3 class="section-header">📋 Complete Season-by-Season Statistics</h3>', unsafe_allow_html=True)
+    # Complete Season Statistics Table
+    st.markdown('## 📋 Complete Season-by-Season Statistics')
     
     # Create display dataframe
     display_df = seasons_df.copy()
@@ -408,112 +661,126 @@ def show():
     
     st.dataframe(table_df, use_container_width=True, height=600)
     
-    # Season highlights and milestones
-    st.markdown('<h3 class="section-header">🌟 Season Highlights & Milestones</h3>', unsafe_allow_html=True)
+    # Summary metrics with custom design
+    st.markdown('## 🏁 Season Legacy Championship')
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.markdown("""
-        ### 🇦🇷 Messi's Season Milestones:
-        
-        **🏆 Record-Breaking Seasons:**
-        - **2011-12**: 73 goals (All-time single season record)
-        - **2011-12**: 91 calendar year goals (World record)
-        - **2018-19**: 51 goals at age 31 (Late career peak)
-        
-        **🎯 Breakthrough Moments:**
-        - **2008-09**: First 30+ goal season (38 goals)
-        - **2009-10**: First 40+ goal season (47 goals)
-        - **2010-11**: First 50+ goal season (53 goals)
-        
-        **📈 Evolution Highlights:**
-        - **Early**: Gradual development (1-17 goals)
-        - **Peak**: Incredible consistency (37-73 goals)
-        - **Adaptation**: New leagues success (11-25 goals)
-        
-        **🏅 Trophy Seasons:**
-        - **2008-09**: 6 trophies (Treble + more)
-        - **2015-16**: Treble season
-        - **2022-23**: World Cup year impact
-        """)
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid {MESSI_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">🔥</div>
+            <h4 style="color: {MESSI_COLOR}; margin: 0 0 10px 0;">Peak Season</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                MESSI
+            </div>
+            <div style="
+                background: {MESSI_COLOR}; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">73 goals 2011-12</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("""
-        ### 🇵🇹 Ronaldo's Season Milestones:
-        
-        **🏆 Record-Breaking Seasons:**
-        - **2013-14**: 61 goals (Personal best)
-        - **2014-15**: 61 goals (Consistency peak)
-        - **2007-08**: 42 goals (Breakthrough season)
-        
-        **🎯 Breakthrough Moments:**
-        - **2006-07**: First 20+ goal season (23 goals)
-        - **2007-08**: First 40+ goal season (42 goals)
-        - **2009-10**: Real Madrid adaptation (40 goals)
-        
-        **📈 Evolution Highlights:**
-        - **Early**: Rapid development (5-42 goals)
-        - **Peak**: Machine-like consistency (40-61 goals)
-        - **Adaptation**: Success across leagues
-        
-        **🏅 Trophy Seasons:**
-        - **2013-14**: 4 trophies (La Décima)
-        - **2016-17**: Champions League threepeat
-        - **2018-19**: Juventus adaptation
-        """)
-    
-    # Career summary
-    st.markdown('<h3 class="section-header">🏁 Season-by-Season Legacy</h3>', unsafe_allow_html=True)
-    
-    st.markdown(f"""
-    <div class="final-verdict-card">
-        <h2>📅 Two Decades of Excellence</h2>
-        <div style="display: flex; justify-content: space-around; margin: 2rem 0;">
-            <div style="text-align: center;">
-                <h3>🇦🇷 MESSI'S CAREER JOURNEY</h3>
-                <p><strong>21 Seasons</strong> of professional football</p>
-                <p><strong>Peak:</strong> 2011-12 (73 goals, 29 assists)</p>
-                <p><strong>Most Consistent:</strong> 2010-2019 decade</p>
-                <p><strong>Longevity:</strong> 20+ goals at age 36</p>
-                <p><strong>Adaptation:</strong> Success in 3 different leagues</p>
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid {RONALDO_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">📊</div>
+            <h4 style="color: {RONALDO_COLOR}; margin: 0 0 10px 0;">Consistency</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                RONALDO
             </div>
-            <div style="text-align: center;">
-                <h3>🇵🇹 RONALDO'S CAREER JOURNEY</h3>
-                <p><strong>21 Seasons</strong> of professional football</p>
-                <p><strong>Peak:</strong> 2013-14 (61 goals, 22 assists)</p>
-                <p><strong>Most Consistent:</strong> 2007-2018 period</p>
-                <p><strong>Longevity:</strong> 35+ goals at age 38</p>
-                <p><strong>Versatility:</strong> Success in 5 different leagues</p>
-            </div>
+            <div style="
+                background: {RONALDO_COLOR}; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">14 seasons 40+ goals</div>
         </div>
-        <p style="font-size: 1.2rem; margin-top: 1rem;">
-            <strong>Season Legacy:</strong> 🤝 <strong>BOTH LEGENDS</strong> - Different peaks, sustained excellence!
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
-    # Final insights
-    st.markdown("""
-    ---
-    ### 🌟 Season-by-Season Insights
+    with col3:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid {MESSI_COLOR};
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">🎯</div>
+            <h4 style="color: {MESSI_COLOR}; margin: 0 0 10px 0;">Playmaking</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                MESSI
+            </div>
+            <div style="
+                background: {MESSI_COLOR}; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">+119 more assists</div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    **📈 Career Trajectories:** Both players show remarkably different but equally impressive career arcs. Messi's 
-    journey features a gradual rise to an incredible peak, while Ronaldo shows more consistent excellence across 
-    a longer period with multiple peaks.
-    
-    **🏔️ Peak Performance:** Messi's 2011-12 season with 73 goals stands as potentially the greatest individual 
-    season in football history. Ronaldo's peak was more sustained, with multiple 50+ goal seasons.
-    
-    **⏰ Longevity:** Both have maintained elite performance well into their 30s, adapting their games and proving 
-    that class is permanent. Their ability to perform at the highest level across two decades is unprecedented.
-    
-    **🔄 Adaptation:** The season-by-season analysis shows how both players evolved their games - Messi becoming 
-    more of a playmaker in later years, Ronaldo maintaining goal-scoring prowess across different leagues.
-    
-    **🏆 Legacy:** Together, they've defined what excellence looks like across 21 seasons, inspiring generations 
-    and setting standards that may never be matched.
-    """)
+    with col4:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid #FFD700;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        ">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">👑</div>
+            <h4 style="color: #FFD700; margin: 0 0 10px 0;">LONGEVITY KINGS</h4>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin: 10px 0;">
+                BOTH
+            </div>
+            <div style="
+                background: #FFD700; 
+                color: white; 
+                padding: 8px 16px; 
+                border-radius: 25px; 
+                font-weight: bold;
+                font-size: 0.9rem;
+            ">21 epic seasons</div>
+        </div>
+        """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     show()
