@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 import sys
 import os
 
+
 # Add the pages directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'pages'))
 
@@ -18,6 +19,7 @@ overview = safe_import('overview')
 career = safe_import('career')
 awards = safe_import('awards')
 disciplinary_statistics = safe_import('disciplinary_statistics')
+
 heatmap = safe_import('heatmap')
 verdict = safe_import('verdict')
 club = safe_import('club')
@@ -439,18 +441,18 @@ def render_enhanced_navbar():
     
     # Navigation buttons
     nav_items = [
-        ('overview', '📊 Overview'),
-        ('career', '📈 Career Stats'),
-        ('awards', '🏅 Awards'),
-        ('disciplinary', '🟨 Fair Play'),
-        ('heatmap', '🗺️ Heat Maps'),
-        ('physical', '⚽ Physical'),
-        ('clutch', '🏆 Clutch'),
-        ('international', '🌍 International'),
-        ('club', '🏟️ Clubs'),
-        ('fame', '👥 Fame'),
-        ('season', '📅 Seasons'),
-        ('verdict', '🏁 Final Verdict')
+        ('overview', 'Overview'),
+        ('career', 'Career Stats'),
+        ('awards', 'Awards'),
+        ('disciplinary', 'Fair Play'),
+        ('heatmap', 'Heat Maps'),
+        ('physical', 'Physical'),
+        ('clutch', 'Clutch'),
+        ('international', 'International'),
+        ('club', 'Clubs'),
+        ('fame', 'Fame'),
+        ('season', 'Seasons'),
+        ('verdict', 'Final Verdict')
     ]
     
     # Create columns for navigation buttons
@@ -477,6 +479,7 @@ def route_page():
         elif page == 'disciplinary' and disciplinary_statistics:
             disciplinary_statistics.show()
         elif page == 'heatmap' and heatmap:
+            st.write("Loading heatmap page...")  # DEBUG
             heatmap.show()
         elif page == 'physical' and physical:
             physical.show()
