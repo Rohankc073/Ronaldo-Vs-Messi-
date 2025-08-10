@@ -237,6 +237,7 @@ def main():
         transition: left 0.5s ease;
     }
     
+                //A
     .stat-card:hover::before {
         left: 100%;
     }
