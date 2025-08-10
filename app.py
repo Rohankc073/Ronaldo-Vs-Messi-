@@ -239,6 +239,8 @@ def main():
     
                 //A
                 //
+
+                ..
     .stat-card:hover::before {
         left: 100%;
     }
