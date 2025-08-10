@@ -1,6 +1,4 @@
-Here’s a **README.md** you can use for your GitHub repo — it’s clean, well-structured, and tailored to your Streamlit Ronaldo vs Messi dashboard project:
 
----
 
 # 🐐 Ronaldo vs Messi – Data-Driven Football Comparison Dashboard
 
