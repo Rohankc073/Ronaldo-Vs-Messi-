@@ -1,4 +1,8 @@
+# Make sure your requirements.txt includes:
 streamlit
+numpy
+matplotlib
+scipy
 plotly
 pandas
-numpy
+seaborn
