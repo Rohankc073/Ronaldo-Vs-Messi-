@@ -1,0 +1,3 @@
+player,season,age,club,league,apps,starts,minutes,goals,assists,non_pen_goals,pens_scored,pens_att,shots,shots_on_target,xG,npxG,xAG,key_passes,SCA,GCA,yellow,red
+Lionel Messi,2024-25,37,Inter Miami,MLS,34,30,2700,30,12,28,2,2,100,50,20.5,18.0,15.3,60,120,95,3,0
+Cristiano Ronaldo,2024-25,40,Al Nassr,Saudi Pro League,32,32,2880,35,8,30,5,6,140,70,25.1,20.2,7.5,32,75,41,5,0

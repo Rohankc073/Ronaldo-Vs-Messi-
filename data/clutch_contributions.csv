@@ -1,0 +1,3 @@
+player,date,opponent,competition,venue,goal_time,match_state_before,knockout_flag,game_winner
+Lionel Messi,2025-03-15,LAFC,MLS,H,87,level,0,1
+Cristiano Ronaldo,2025-03-20,Al Hilal,Saudi Pro League,A,82,level,0,0
